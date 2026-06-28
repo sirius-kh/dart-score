@@ -2,13 +2,20 @@
 
 import { useState } from "react";
 import type { StartingScore } from "@/lib/types";
+import type { GameOptions } from "@/lib/x01";
 
 interface SetupScreenProps {
-  onStart: (playerNames: string[], startingScore: StartingScore) => void;
+  onStart: (
+    playerNames: string[],
+    startingScore: StartingScore,
+    options: GameOptions,
+  ) => void;
 }
 
 export default function SetupScreen({ onStart }: SetupScreenProps) {
   const [startingScore, setStartingScore] = useState<StartingScore>(501);
+  const [doubleOut, setDoubleOut] = useState(true);
+  const [legsToWin, setLegsToWin] = useState(1);
   const [names, setNames] = useState<string[]>(["Тоглогч 1", "Тоглогч 2"]);
 
   const updateName = (index: number, value: string) => {
@@ -27,7 +34,7 @@ export default function SetupScreen({ onStart }: SetupScreenProps) {
     const cleaned = names
       .map((n, i) => n.trim() || `Тоглогч ${i + 1}`)
       .slice(0, names.length);
-    onStart(cleaned, startingScore);
+    onStart(cleaned, startingScore, { doubleOut, legsToWin });
   };
 
   const canStart = names.length >= 2;
@@ -53,6 +60,64 @@ export default function SetupScreen({ onStart }: SetupScreenProps) {
             </button>
           ))}
         </div>
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-neutral-400">Хаах дүрэм</label>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => setDoubleOut(true)}
+            className={`rounded-lg border px-4 py-3 text-sm font-semibold transition ${
+              doubleOut
+                ? "border-emerald-500 bg-emerald-500/15 text-emerald-400"
+                : "border-neutral-700 text-neutral-300 hover:border-neutral-500"
+            }`}
+          >
+            Хосоор хаах
+            <span className="block text-xs font-normal opacity-70">
+              Double-out
+            </span>
+          </button>
+          <button
+            onClick={() => setDoubleOut(false)}
+            className={`rounded-lg border px-4 py-3 text-sm font-semibold transition ${
+              !doubleOut
+                ? "border-emerald-500 bg-emerald-500/15 text-emerald-400"
+                : "border-neutral-700 text-neutral-300 hover:border-neutral-500"
+            }`}
+          >
+            Энгийн хаалт
+            <span className="block text-xs font-normal opacity-70">
+              Straight-out
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-neutral-400">
+          Хэдэн leg хожвол ялах вэ
+        </label>
+        <div className="grid grid-cols-4 gap-2">
+          {[1, 2, 3, 5].map((legs) => (
+            <button
+              key={legs}
+              onClick={() => setLegsToWin(legs)}
+              className={`rounded-lg border px-3 py-3 text-lg font-semibold transition ${
+                legsToWin === legs
+                  ? "border-emerald-500 bg-emerald-500/15 text-emerald-400"
+                  : "border-neutral-700 text-neutral-300 hover:border-neutral-500"
+              }`}
+            >
+              {legs}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-neutral-500">
+          {legsToWin === 1
+            ? "Нэг leg — эхэлж хаасан нь ялна."
+            : `Эхэлж ${legsToWin} leg хожсон тоглогч ялна.`}
+        </p>
       </section>
 
       <section className="flex flex-col gap-2">

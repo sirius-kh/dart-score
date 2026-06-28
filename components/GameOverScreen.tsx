@@ -1,7 +1,7 @@
 "use client";
 
 import type { GameState } from "@/lib/types";
-import { threeDartAverage } from "@/lib/x01";
+import { overallAverage, totalDarts, highestTurn } from "@/lib/x01";
 import { playerColor } from "@/lib/colors";
 
 interface GameOverScreenProps {
@@ -12,9 +12,9 @@ interface GameOverScreenProps {
 
 export default function GameOverScreen({ state, onUndo, onNewGame }: GameOverScreenProps) {
   const winner = state.players.find((p) => p.id === state.winnerId);
-  // Дунджаар эрэмбэлсэн жагсаалт
+  // Хожсон leg, дараа нь дунджаар эрэмбэлсэн жагсаалт
   const ranked = [...state.players].sort(
-    (a, b) => threeDartAverage(b) - threeDartAverage(a),
+    (a, b) => b.legsWon - a.legsWon || overallAverage(b) - overallAverage(a),
   );
 
   return (
@@ -24,6 +24,11 @@ export default function GameOverScreen({ state, onUndo, onNewGame }: GameOverScr
         <h1 className="text-2xl font-bold text-emerald-400">
           {winner?.name ?? "Тоглогч"} яллаа!
         </h1>
+        {state.legsToWin > 1 && winner && (
+          <p className="text-sm text-neutral-400">
+            {winner.legsWon} leg хожиж тоглоомыг авлаа.
+          </p>
+        )}
       </div>
 
       <div className="flex flex-col gap-2 text-left">
@@ -41,9 +46,15 @@ export default function GameOverScreen({ state, onUndo, onNewGame }: GameOverScr
               <span className="flex items-center gap-2 font-semibold">
                 <span className={`h-3 w-3 shrink-0 rounded-full ${color.dot}`} />
                 {p.name}
+                {state.legsToWin > 1 && (
+                  <span className="text-xs font-normal text-neutral-500">
+                    🏆 {p.legsWon}
+                  </span>
+                )}
               </span>
-              <span className="text-sm text-neutral-400">
-                {p.turns.length} ээлж · дундаж {threeDartAverage(p).toFixed(1)}
+              <span className="text-right text-xs text-neutral-400">
+                дундаж {overallAverage(p).toFixed(1)} · {totalDarts(p)} сум · их{" "}
+                {highestTurn(p)}
               </span>
             </div>
           );

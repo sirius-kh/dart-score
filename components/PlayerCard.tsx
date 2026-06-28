@@ -9,9 +9,19 @@ interface PlayerCardProps {
   isActive: boolean;
   /** Тоглогчийн дараалал — өнгө сонгоход ашиглана */
   colorIndex: number;
+  /** Тоглоом хожих leg-ийн тоо (1 бол leg тоологч харуулахгүй) */
+  legsToWin: number;
+  /** Хосоор хаах зөвлөмж (зөвхөн идэвхтэй тоглогчид, боломжтой үед) */
+  checkout?: string | null;
 }
 
-export default function PlayerCard({ player, isActive, colorIndex }: PlayerCardProps) {
+export default function PlayerCard({
+  player,
+  isActive,
+  colorIndex,
+  legsToWin,
+  checkout,
+}: PlayerCardProps) {
   const avg = threeDartAverage(player);
   const color = playerColor(colorIndex);
 
@@ -28,11 +38,21 @@ export default function PlayerCard({ player, isActive, colorIndex }: PlayerCardP
           <span className={`h-3 w-3 shrink-0 rounded-full ${color.dot}`} />
           {player.name}
         </span>
-        {isActive && (
-          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${color.badge}`}>
-            Ээлж
-          </span>
-        )}
+        <span className="flex items-center gap-2">
+          {legsToWin > 1 && (
+            <span
+              className="rounded-full bg-neutral-800 px-2 py-0.5 text-xs font-medium text-neutral-300"
+              title="Хожсон leg"
+            >
+              🏆 {player.legsWon}/{legsToWin}
+            </span>
+          )}
+          {isActive && (
+            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${color.badge}`}>
+              Ээлж
+            </span>
+          )}
+        </span>
       </div>
       <div className={`text-4xl font-bold tabular-nums ${color.text}`}>
         {player.remaining}
@@ -41,6 +61,12 @@ export default function PlayerCard({ player, isActive, colorIndex }: PlayerCardP
         <span>Ээлж: {player.turns.length}</span>
         <span>Дундаж: {avg.toFixed(1)}</span>
       </div>
+      {isActive && checkout && (
+        <div className="mt-1 flex items-center gap-2 text-xs">
+          <span className="text-neutral-500">Хаалт:</span>
+          <span className="font-semibold tracking-wide text-amber-400">{checkout}</span>
+        </div>
+      )}
     </div>
   );
 }

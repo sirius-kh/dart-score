@@ -8,6 +8,8 @@ interface ScoreInputProps {
   onSubmit: (scored: number) => void;
   onUndo: () => void;
   canUndo: boolean;
+  /** Хосоор хаах зөвлөмж (байвал) */
+  checkout?: string | null;
 }
 
 export default function ScoreInput({
@@ -15,6 +17,7 @@ export default function ScoreInput({
   onSubmit,
   onUndo,
   canUndo,
+  checkout,
 }: ScoreInputProps) {
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +39,11 @@ export default function ScoreInput({
         <span className="font-semibold text-neutral-200">{playerName}</span>-ийн ээлжийн
         нийт оноо
       </label>
+      {checkout && (
+        <p className="text-sm text-amber-400">
+          💡 Хаах зам: <span className="font-semibold tracking-wide">{checkout}</span>
+        </p>
+      )}
       <div className="flex gap-2">
         <input
           type="number"

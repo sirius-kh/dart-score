@@ -2,20 +2,35 @@
 
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import type { GameState, StartingScore } from "@/lib/types";
-import { applyTurn, evaluateTurn, isValidScore, startGame, undoLastTurn } from "@/lib/x01";
+import {
+  applyTurn,
+  evaluateTurn,
+  isValidScore,
+  startGame,
+  undoLastTurn,
+  type GameOptions,
+} from "@/lib/x01";
 import { playBust, playWin, speakScore } from "@/lib/sounds";
 import SetupScreen from "@/components/SetupScreen";
 import GameScreen from "@/components/GameScreen";
 import GameOverScreen from "@/components/GameOverScreen";
 
-const STORAGE_KEY = "dart-score:game";
+// v2: leg/match, double-out, өргөтгөсөн статистик нэмэгдсэнээр GameState-ийн бүтэц
+// өөрчлөгдсөн тул түлхүүрийг шинэчилж, нийцгүй хуучин хадгалсан тоглоомыг үл хэрэгснэ.
+const STORAGE_KEY = "dart-score:game:v2";
 
 const INITIAL_STATE: GameState = {
   phase: "setup",
   startingScore: 501,
+  doubleOut: true,
+  legsToWin: 1,
+  legNumber: 1,
   players: [],
   currentPlayerIndex: 0,
+  legStarterIndex: 0,
   winnerId: null,
+  legWinnerId: null,
+  lastWasBust: false,
 };
 
 export default function Home() {
@@ -25,15 +40,19 @@ export default function Home() {
   );
   const [soundOn, setSoundOn] = useLocalStorage<boolean>("dart-score:sound", true);
 
-  const handleStart = (names: string[], startingScore: StartingScore) => {
-    setState(startGame(names, startingScore));
+  const handleStart = (
+    names: string[],
+    startingScore: StartingScore,
+    options: GameOptions,
+  ) => {
+    setState(startGame(names, startingScore, options));
   };
 
   const handleScore = (scored: number) => {
     // Дуу: оноо хэрэглэхээс өмнө үр дүнг тооцоолж тохирох дууг тоглуулна
     if (soundOn && state.phase === "playing" && isValidScore(scored)) {
       const current = state.players[state.currentPlayerIndex];
-      const outcome = evaluateTurn(current.remaining, scored);
+      const outcome = evaluateTurn(current.remaining, scored, state.doubleOut);
       // Оруулсан оноог дуугаар хэлнэ
       speakScore(scored);
       // Bust/ялалтын үед нэмэлт эффект дуу

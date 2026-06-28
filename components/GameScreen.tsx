@@ -1,6 +1,7 @@
 "use client";
 
 import type { GameState } from "@/lib/types";
+import { checkoutHint } from "@/lib/checkout";
 import PlayerCard from "./PlayerCard";
 import ScoreInput from "./ScoreInput";
 
@@ -22,12 +23,31 @@ export default function GameScreen({
   onToggleSound,
 }: GameScreenProps) {
   const current = state.players[state.currentPlayerIndex];
-  const canUndo = state.players.some((p) => p.turns.length > 0);
+  // Хэн нэгэн ээлжээ хийсэн (энэ leg-д), эсвэл өмнөх leg байгаа бол undo боломжтой
+  const canUndo =
+    state.players.some((p) => p.turns.length > 0) ||
+    state.players.some((p) => p.legTurns.length > 0);
+
+  // Идэвхтэй тоглогчийн хосоор хаах зөвлөмж (double-out үед)
+  const checkout = state.doubleOut ? checkoutHint(current.remaining) : null;
+
+  // Leg хожсон ялагчийн нэр (leg хооронд түр харуулна)
+  const legWinner =
+    state.legWinnerId != null
+      ? state.players.find((p) => p.id === state.legWinnerId)
+      : null;
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">🎯 {state.startingScore}</h1>
+        <h1 className="text-xl font-bold">
+          🎯 {state.startingScore}
+          {state.legsToWin > 1 && (
+            <span className="ml-2 text-sm font-medium text-neutral-500">
+              Leg {state.legNumber}
+            </span>
+          )}
+        </h1>
         <div className="flex items-center gap-2">
           <button
             onClick={onToggleSound}
@@ -46,6 +66,17 @@ export default function GameScreen({
         </div>
       </div>
 
+      {legWinner && (
+        <div className="rounded-lg border border-emerald-600/50 bg-emerald-500/10 px-4 py-2 text-center text-sm font-semibold text-emerald-400">
+          🏆 {legWinner.name} энэ leg-ийг хожлоо! Дараагийн leg эхэллээ.
+        </div>
+      )}
+      {state.lastWasBust && (
+        <div className="rounded-lg border border-red-600/50 bg-red-500/10 px-4 py-2 text-center text-sm font-semibold text-red-400">
+          💥 Bust! Оноо хэвээр, ээлж шилжлээ.
+        </div>
+      )}
+
       <div className="flex flex-col gap-2">
         {state.players.map((player, i) => (
           <PlayerCard
@@ -53,6 +84,8 @@ export default function GameScreen({
             player={player}
             isActive={i === state.currentPlayerIndex}
             colorIndex={i}
+            legsToWin={state.legsToWin}
+            checkout={i === state.currentPlayerIndex ? checkout : null}
           />
         ))}
       </div>
@@ -62,6 +95,7 @@ export default function GameScreen({
         onSubmit={onScore}
         onUndo={onUndo}
         canUndo={canUndo}
+        checkout={checkout}
       />
     </div>
   );

@@ -57,6 +57,34 @@ export const PLAYER_COLORS: PlayerColor[] = [
     activeBg: "bg-lime-500/10",
     badge: "bg-lime-500/20 text-lime-400",
   },
+  {
+    dot: "bg-cyan-500",
+    text: "text-cyan-400",
+    activeBorder: "border-cyan-500",
+    activeBg: "bg-cyan-500/10",
+    badge: "bg-cyan-500/20 text-cyan-400",
+  },
+  {
+    dot: "bg-orange-500",
+    text: "text-orange-400",
+    activeBorder: "border-orange-500",
+    activeBg: "bg-orange-500/10",
+    badge: "bg-orange-500/20 text-orange-400",
+  },
+  {
+    dot: "bg-fuchsia-500",
+    text: "text-fuchsia-400",
+    activeBorder: "border-fuchsia-500",
+    activeBg: "bg-fuchsia-500/10",
+    badge: "bg-fuchsia-500/20 text-fuchsia-400",
+  },
+  {
+    dot: "bg-teal-500",
+    text: "text-teal-400",
+    activeBorder: "border-teal-500",
+    activeBg: "bg-teal-500/10",
+    badge: "bg-teal-500/20 text-teal-400",
+  },
 ];
 
 /** Index-ээр өнгө сонгох (давах тохиолдолд эргэлдэнэ) */
