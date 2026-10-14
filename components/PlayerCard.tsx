@@ -23,6 +23,7 @@ export default function PlayerCard({
   checkout,
 }: PlayerCardProps) {
   const avg = threeDartAverage(player);
+  const lastTurn = player.turns.at(-1);
   const color = playerColor(colorIndex);
 
   return (
@@ -54,12 +55,21 @@ export default function PlayerCard({
           )}
         </span>
       </div>
-      <div className={`text-4xl font-bold tabular-nums ${color.text}`}>
+      <div
+        // Үлдэгдэл өөрчлөгдөх бүрд анимэйшн тоглоно
+        key={player.remaining}
+        className={`origin-left animate-pop text-4xl font-bold tabular-nums ${color.text}`}
+      >
         {player.remaining}
       </div>
       <div className="flex gap-4 text-xs text-neutral-500">
         <span>Ээлж: {player.turns.length}</span>
         <span>Дундаж: {avg.toFixed(1)}</span>
+        {lastTurn !== undefined && (
+          <span>
+            Сүүлд: <span className="font-semibold text-neutral-300">{lastTurn}</span>
+          </span>
+        )}
       </div>
       {isActive && checkout && (
         <div className="mt-1 flex items-center gap-2 text-xs">

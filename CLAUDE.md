@@ -48,10 +48,12 @@ npm run lint     # ESLint
 | `lib/colors.ts` | Тоглогчийн өнгөний палитр (`PLAYER_COLORS`, `playerColor`) |
 | `lib/sounds.ts` | Web Audio эффект + TTS дуу хэлэлт |
 | `hooks/useLocalStorage.ts` | SSR-safe localStorage синк hook (`[value, setValue, hydrated]`) |
-| `components/SetupScreen.tsx` | Эхлэх оноо + тоглогч сонгох |
+| `hooks/useWakeLock.ts` | Тоглоомын үед дэлгэц унтраахгүй (Screen Wake Lock — зөвхөн HTTPS/localhost) |
+| `components/SetupScreen.tsx` | Эхлэх оноо + тоглогч сонгох; сүүлийн тоглоомын тохиргоогоор урьдчилан бөглөж, сүүлд тоглосон нэрсийг санал болгоно |
 | `components/GameScreen.tsx` | Тоглоомын дэлгэц (картууд + оноо оруулах + дуу товч) |
-| `components/ScoreInput.tsx` | "Нийт оноо" горим: оноо оруулах талбар + түргэн товчнууд + Undo |
+| `components/ScoreInput.tsx` | "Нийт оноо" горим: апп доторх тоон товчлуур (системийн гар гаргахгүй; компьютерт гараас бичнэ) + түргэн товчнууд + Undo |
 | `components/DartPad.tsx` | "Сум бүрээр" горим: S/D/T + 1–20/25/Алдсан товчлуур; win/bust эсвэл 3 сумаар ээлж дуусна |
+| `components/FlashOverlay.tsx` | 180 / bust / leg хожих үед дэлгэцийн голд түр гарах тэмдэглэгээ (`onAnimationEnd`-ээр алга болно) |
 | `components/StatsScreen.tsx` | Тоглогчийн нэгтгэсэн статистик + сүүлийн тоглоомуудын жагсаалт |
 | `components/PlayerCard.tsx` | Нэг тоглогчийн карт (өнгөт) |
 | `components/GameOverScreen.tsx` | Ялагч + статистик + дахин эхлэх |
@@ -115,5 +117,7 @@ X01: тоглогч бүр эхлэх оноогоор (301/501/701) эхэлж 
 - **SSR-safe:** `useLocalStorage` нь `useSyncExternalStore` дээр суурилсан — server/hydration
   render-д default, дараа нь localStorage-ийн утга (`hydrated` flag-аар "Уншиж байна…").
   `defaultValue`-г модулийн тогтмол болгож дамжуул (render бүрд шинэ объект бүү үүсгэ).
+- **Анимэйшн:** `app/globals.css`-ийн `@theme`-д `animate-shake` / `animate-pop` / `animate-flash`.
+  Дахин тоглуулахын тулд элементийн `key`-г солино (жишээ нь үлдэгдэл, ээлжийн тоо).
 - **Tailwind v4 динамик класс:** `lib/colors.ts`-д класс нэрсийг бүтэн литералаар бичсэн
   (purge хийгдэхгүй) — энэ хэвийг хадгал.

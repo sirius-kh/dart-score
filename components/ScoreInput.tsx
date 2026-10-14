@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MAX_TURN_SCORE, isValidScore } from "@/lib/x01";
 
 interface ScoreInputProps {
@@ -12,6 +12,13 @@ interface ScoreInputProps {
   checkout?: string | null;
 }
 
+const QUICK_SCORES = [0, 26, 41, 45, 60, 81, 100, 140];
+const DIGITS = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+
+/**
+ * Ээлжийн нийт оноо оруулах. Утсанд системийн гар гаргахгүйн тулд апп доторх тоон
+ * товчлуур ашиглана; компьютер дээр гараас (0–9, Backspace, Enter) бичиж болно.
+ */
 export default function ScoreInput({
   playerName,
   onSubmit,
@@ -22,70 +29,115 @@ export default function ScoreInput({
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const submit = () => {
-    const scored = Number(value);
-    if (value.trim() === "" || !isValidScore(scored)) {
-      setError(`0–${MAX_TURN_SCORE} хооронд бүхэл тоо оруулна уу.`);
+  const typeDigit = (d: string) => {
+    const next = value === "0" ? d : value + d;
+    if (Number(next) > MAX_TURN_SCORE) {
+      setError(`Хамгийн ихдээ ${MAX_TURN_SCORE}.`);
       return;
     }
+    setValue(next);
+    setError(null);
+  };
+
+  const backspace = () => {
+    setValue((v) => v.slice(0, -1));
+    setError(null);
+  };
+
+  const submitScore = (scored: number) => {
     onSubmit(scored);
     setValue("");
     setError(null);
   };
 
+  const submit = () => {
+    const scored = Number(value);
+    if (value === "" || !isValidScore(scored)) {
+      setError(`0–${MAX_TURN_SCORE} хооронд оноо оруулна уу.`);
+      return;
+    }
+    submitScore(scored);
+  };
+
+  // Гарын товчлуур — сүүлийн render-ийн handler-уудыг ref-ээр дуудна
+  const keyHandlers = useRef({ typeDigit, backspace, submit });
+  useEffect(() => {
+    keyHandlers.current = { typeDigit, backspace, submit };
+  });
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const h = keyHandlers.current;
+      if (/^[0-9]$/.test(e.key)) h.typeDigit(e.key);
+      else if (e.key === "Backspace") h.backspace();
+      else if (e.key === "Enter") h.submit();
+      else return;
+      e.preventDefault();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const keyClass =
+    "rounded-lg border border-neutral-700 bg-neutral-900 py-2.5 text-xl font-semibold tabular-nums text-neutral-200 transition hover:border-emerald-500 active:bg-emerald-500/20";
+
   return (
     <div className="flex flex-col gap-3">
-      <label className="text-sm text-neutral-400">
-        <span className="font-semibold text-neutral-200">{playerName}</span>-ийн ээлжийн
-        нийт оноо
-      </label>
+      <div className="flex items-center justify-between text-sm text-neutral-400">
+        <span>
+          <span className="font-semibold text-neutral-200">{playerName}</span>-ийн ээлжийн
+          нийт оноо
+        </span>
+      </div>
       {checkout && (
         <p className="text-sm text-amber-400">
           💡 Хаах зам: <span className="font-semibold tracking-wide">{checkout}</span>
         </p>
       )}
-      <div className="flex gap-2">
-        <input
-          type="number"
-          inputMode="numeric"
-          min={0}
-          max={MAX_TURN_SCORE}
-          value={value}
-          onChange={(e) => {
-            setValue(e.target.value);
-            setError(null);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") submit();
-          }}
-          placeholder="0–180"
-          autoFocus
-          className="flex-1 rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-3 text-2xl font-bold tabular-nums outline-none focus:border-emerald-500"
-        />
-        <button
-          onClick={submit}
-          className="rounded-lg bg-emerald-600 px-6 py-3 text-lg font-bold text-white transition hover:bg-emerald-500"
-        >
-          Бүртгэх
-        </button>
+
+      {/* Оруулж буй утга */}
+      <div
+        aria-live="polite"
+        className={`rounded-lg border bg-neutral-900 px-4 py-2 text-right text-4xl font-bold tabular-nums ${
+          error ? "border-red-500/70" : "border-neutral-700"
+        }`}
+      >
+        {value === "" ? <span className="text-neutral-600">0–180</span> : value}
       </div>
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="-mt-1 text-sm text-red-400">{error}</p>}
 
       {/* Түргэн товчлуурууд */}
       <div className="grid grid-cols-4 gap-2">
-        {[0, 26, 41, 45, 60, 81, 100, 140].map((q) => (
+        {QUICK_SCORES.map((q) => (
           <button
             key={q}
-            onClick={() => {
-              onSubmit(q);
-              setValue("");
-              setError(null);
-            }}
-            className="rounded-lg border border-neutral-700 px-2 py-2 text-sm text-neutral-300 hover:border-emerald-500 hover:text-emerald-400"
+            onClick={() => submitScore(q)}
+            className="rounded-lg border border-neutral-700 bg-neutral-900 px-2 py-2 text-sm text-neutral-300 hover:border-emerald-500 hover:text-emerald-400"
           >
             {q}
           </button>
         ))}
+      </div>
+
+      {/* Тоон товчлуур */}
+      <div className="grid grid-cols-3 gap-2">
+        {DIGITS.map((d) => (
+          <button key={d} onClick={() => typeDigit(d)} className={keyClass}>
+            {d}
+          </button>
+        ))}
+        <button onClick={backspace} aria-label="Арилгах" className={keyClass}>
+          ⌫
+        </button>
+        <button onClick={() => typeDigit("0")} className={keyClass}>
+          0
+        </button>
+        <button
+          onClick={submit}
+          className="rounded-lg bg-emerald-600 py-2.5 text-lg font-bold text-white transition hover:bg-emerald-500"
+        >
+          Бүртгэх
+        </button>
       </div>
 
       <button

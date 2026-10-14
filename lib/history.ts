@@ -130,3 +130,15 @@ export function aggregateStats(history: GameRecord[]): PlayerStats[] {
     .map(({ points, ...s }) => ({ ...s, average: averageOf(points, s.darts) }))
     .sort((a, b) => b.wins - a.wins || b.average - a.average);
 }
+
+/** Сүүлд тоглосон тоглогчдын нэр (шинээс хуучин руу, давхардалгүй) */
+export function recentNames(history: GameRecord[], limit = 12): string[] {
+  const names: string[] = [];
+  for (const game of history) {
+    for (const p of game.players) {
+      if (!names.includes(p.name)) names.push(p.name);
+      if (names.length >= limit) return names;
+    }
+  }
+  return names;
+}

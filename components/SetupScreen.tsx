@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { StartingScore } from "@/lib/types";
 import type { GameOptions } from "@/lib/x01";
+import type { GameRecord } from "@/lib/history";
 
 interface SetupScreenProps {
   onStart: (
@@ -11,20 +12,49 @@ interface SetupScreenProps {
     options: GameOptions,
   ) => void;
   onShowStats: () => void;
+  /** Хамгийн сүүлд дууссан тоглоом — тохиргоог урьдчилан бөглөхөд */
+  lastGame?: GameRecord;
+  /** Сүүлд тоглосон тоглогчдын нэр (хурдан сонгох) */
+  recentNames: string[];
 }
 
-export default function SetupScreen({ onStart, onShowStats }: SetupScreenProps) {
-  const [startingScore, setStartingScore] = useState<StartingScore>(501);
-  const [doubleOut, setDoubleOut] = useState(true);
-  const [legsToWin, setLegsToWin] = useState(1);
-  const [names, setNames] = useState<string[]>(["Тоглогч 1", "Тоглогч 2"]);
+const defaultName = (i: number) => `Тоглогч ${i + 1}`;
+const isDefaultName = (name: string) => /^Тоглогч \d+$/.test(name.trim()) || !name.trim();
+
+export default function SetupScreen({
+  onStart,
+  onShowStats,
+  lastGame,
+  recentNames,
+}: SetupScreenProps) {
+  // Сүүлийн тоглоомын тохиргоог анхны утга болгоно (дахин тоглоход хурдан)
+  const [startingScore, setStartingScore] = useState<StartingScore>(
+    lastGame?.startingScore ?? 501,
+  );
+  const [doubleOut, setDoubleOut] = useState(lastGame?.doubleOut ?? true);
+  const [legsToWin, setLegsToWin] = useState(lastGame?.legsToWin ?? 1);
+  const [names, setNames] = useState<string[]>(
+    lastGame ? lastGame.players.map((p) => p.name) : [defaultName(0), defaultName(1)],
+  );
+
+  const suggestions = recentNames.filter(
+    (n) => !isDefaultName(n) && !names.some((m) => m.trim() === n),
+  );
+
+  // Санал болгосон нэрийг эхний хоосон/анхдагч нэртэй мөрөнд, эсвэл шинэ мөрөнд оруулна
+  const pickName = (name: string) => {
+    setNames((prev) => {
+      const slot = prev.findIndex(isDefaultName);
+      return slot === -1 ? [...prev, name] : prev.map((n, i) => (i === slot ? name : n));
+    });
+  };
 
   const updateName = (index: number, value: string) => {
     setNames((prev) => prev.map((n, i) => (i === index ? value : n)));
   };
 
   const addPlayer = () => {
-    setNames((prev) => [...prev, `Тоглогч ${prev.length + 1}`]);
+    setNames((prev) => [...prev, defaultName(prev.length)]);
   };
 
   const removePlayer = (index: number) => {
@@ -33,7 +63,7 @@ export default function SetupScreen({ onStart, onShowStats }: SetupScreenProps) 
 
   const handleStart = () => {
     const cleaned = names
-      .map((n, i) => n.trim() || `Тоглогч ${i + 1}`)
+      .map((n, i) => n.trim() || defaultName(i))
       .slice(0, names.length);
     onStart(cleaned, startingScore, { doubleOut, legsToWin });
   };
@@ -144,6 +174,19 @@ export default function SetupScreen({ onStart, onShowStats }: SetupScreenProps) 
             </div>
           ))}
         </div>
+        {suggestions.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {suggestions.map((n) => (
+              <button
+                key={n}
+                onClick={() => pickName(n)}
+                className="rounded-full border border-neutral-700 bg-neutral-900 px-3 py-1 text-xs text-neutral-300 hover:border-emerald-500 hover:text-emerald-400"
+              >
+                + {n}
+              </button>
+            ))}
+          </div>
+        )}
         <button
           onClick={addPlayer}
           className="mt-1 rounded-lg border border-dashed border-neutral-700 px-3 py-2 text-sm text-neutral-400 hover:border-neutral-500"

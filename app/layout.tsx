@@ -30,8 +30,8 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-neutral-950 text-neutral-100">
         {/* Ар талын дартсын самбар зураг */}
         <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
-          <div className="absolute inset-0 bg-[url('/dartboard.svg')] bg-contain bg-center bg-no-repeat opacity-15" />
-          <div className="absolute inset-0 bg-gradient-to-b from-neutral-950/70 via-neutral-950/40 to-neutral-950/85" />
+          <div className="absolute inset-0 bg-[url('/dartboard.svg')] bg-contain bg-center bg-no-repeat opacity-[0.07]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-neutral-950/80 via-neutral-950/60 to-neutral-950/90" />
         </div>
         {children}
       </body>

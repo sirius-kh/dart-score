@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useWakeLock } from "@/hooks/useWakeLock";
 import type { Dart, GameState, InputMode, StartingScore } from "@/lib/types";
 import {
   applyDarts,
@@ -15,12 +16,13 @@ import {
   type GameOptions,
   type TurnOutcome,
 } from "@/lib/x01";
-import { addRecord, buildGameRecord, type GameRecord } from "@/lib/history";
+import { addRecord, buildGameRecord, recentNames, type GameRecord } from "@/lib/history";
 import { playBust, playWin, speakScore } from "@/lib/sounds";
 import SetupScreen from "@/components/SetupScreen";
 import GameScreen from "@/components/GameScreen";
 import GameOverScreen from "@/components/GameOverScreen";
 import StatsScreen from "@/components/StatsScreen";
+import FlashOverlay, { type Flash } from "@/components/FlashOverlay";
 
 // v3: тоглоомын id, ээлж бүрийн сумны тоо (turnDarts) нэмэгдсэнээр GameState-ийн бүтэц
 // өөрчлөгдсөн тул түлхүүрийг шинэчилж, нийцгүй хуучин хадгалсан тоглоомыг үл хэрэгснэ.
@@ -56,6 +58,10 @@ export default function Home() {
   );
   const [history, setHistory] = useLocalStorage<GameRecord[]>(HISTORY_KEY, EMPTY_HISTORY);
   const [showStats, setShowStats] = useState(false);
+  const [flash, setFlash] = useState<Flash | null>(null);
+
+  // Тоглоомын үед утасны дэлгэц унтрахгүй
+  useWakeLock(hydrated && state.phase === "playing");
 
   const handleStart = (
     names: string[],
@@ -73,6 +79,16 @@ export default function Home() {
     else if (outcome === "bust") playBust();
   };
 
+  // Ээлжийн үр дүнгийн дэлгэцийн тэмдэглэгээ (тоглоом дуусахад GameOver дэлгэц өөрөө харагдана)
+  const showFlash = (scored: number, outcome: TurnOutcome, next: GameState) => {
+    const id = Date.now();
+    if (outcome === "bust") setFlash({ id, kind: "bust" });
+    else if (outcome === "win" && next.phase === "playing") {
+      const winner = next.players.find((p) => p.id === next.legWinnerId);
+      setFlash({ id, kind: "leg", detail: winner?.name });
+    } else if (scored === 180) setFlash({ id, kind: "180" });
+  };
+
   // Шинэ төлөвийг хадгалж, тоглоом дуусвал түүхэнд бичнэ
   const commit = (next: GameState) => {
     if (next === state) return;
@@ -84,8 +100,11 @@ export default function Home() {
   const handleScore = (scored: number) => {
     if (state.phase !== "playing" || !isValidScore(scored)) return;
     const current = state.players[state.currentPlayerIndex];
-    playTurnSounds(scored, evaluateTurn(current.remaining, scored, state.doubleOut));
-    commit(applyTurn(state, scored));
+    const outcome = evaluateTurn(current.remaining, scored, state.doubleOut);
+    const next = applyTurn(state, scored);
+    playTurnSounds(scored, outcome);
+    showFlash(scored, outcome, next);
+    commit(next);
   };
 
   const handleDarts = (darts: Dart[]) => {
@@ -96,8 +115,10 @@ export default function Home() {
     const thrown = darts
       .slice(0, result.dartsUsed)
       .reduce((a, d) => a + dartValue(d), 0);
+    const next = applyDarts(state, darts);
     playTurnSounds(thrown, result.outcome);
-    commit(applyDarts(state, darts));
+    showFlash(thrown, result.outcome, next);
+    commit(next);
   };
 
   const handleUndo = () => {
@@ -116,6 +137,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-8">
+      <FlashOverlay flash={flash} onDone={() => setFlash(null)} />
       {/* Hydrate болохоос өмнө layout-ийн үсрэлтийг багасгана */}
       {!hydrated ? (
         <div className="text-neutral-500">Уншиж байна…</div>
@@ -127,7 +149,12 @@ export default function Home() {
           onClearAll={() => setHistory(EMPTY_HISTORY)}
         />
       ) : state.phase === "setup" ? (
-        <SetupScreen onStart={handleStart} onShowStats={openStats} />
+        <SetupScreen
+          lastGame={history[0]}
+          recentNames={recentNames(history)}
+          onStart={handleStart}
+          onShowStats={openStats}
+        />
       ) : state.phase === "playing" ? (
         <GameScreen
           state={state}

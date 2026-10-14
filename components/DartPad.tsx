@@ -127,7 +127,7 @@ export default function DartPad({
           <button
             key={n}
             onClick={() => throwDart(n)}
-            className="rounded-lg border border-neutral-700 bg-neutral-900/60 py-3 text-lg font-semibold tabular-nums text-neutral-200 transition hover:border-emerald-500 hover:text-emerald-400 active:bg-emerald-500/20"
+            className="rounded-lg border border-neutral-700 bg-neutral-900 py-3 text-lg font-semibold tabular-nums text-neutral-200 transition hover:border-emerald-500 hover:text-emerald-400 active:bg-emerald-500/20"
           >
             {n}
           </button>
@@ -137,13 +137,13 @@ export default function DartPad({
         <button
           onClick={() => throwDart(25)}
           disabled={multiplier === 3}
-          className="rounded-lg border border-neutral-700 bg-neutral-900/60 py-3 font-semibold text-neutral-200 transition hover:border-emerald-500 hover:text-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-lg border border-neutral-700 bg-neutral-900 py-3 font-semibold text-neutral-200 transition hover:border-emerald-500 hover:text-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {multiplier === 2 ? "Bull (50)" : "25"}
         </button>
         <button
           onClick={() => throwDart(0)}
-          className="rounded-lg border border-neutral-700 bg-neutral-900/60 py-3 font-semibold text-neutral-400 transition hover:border-red-500 hover:text-red-400"
+          className="rounded-lg border border-neutral-700 bg-neutral-900 py-3 font-semibold text-neutral-400 transition hover:border-red-500 hover:text-red-400"
         >
           Алдсан
         </button>
