@@ -7,7 +7,8 @@
 ## Төслийн тойм
 
 **Дартсын оноо бодогч** — X01 (301/501/701) горимын дартсын тоглоомын оноог бодох вэб
-апп. Бүх логик клиент талд ажилладаг, backend/өгөгдлийн сан байхгүй. UI монгол хэл дээр.
+апп. Олон leg-тэй тоглоом, double-out, хаалтын зөвлөмж, сум тус бүрээр оруулах горим,
+дууссан тоглоомын түүх ба тоглогчийн статистиктай. Бүх логик клиент талд ажилладаг, backend/өгөгдлийн сан байхгүй. UI монгол хэл дээр.
 
 - **Framework:** Next.js 16.2.9 (App Router, Turbopack)
 - **Хэл:** TypeScript
@@ -29,7 +30,8 @@ npm run lint     # ESLint
 ## Архитектур
 
 Апп нь **нэг клиент компонент** (`app/page.tsx`) дотор гурван үе шаттай state machine:
-`setup → playing → finished`. Бүх төлөв `useLocalStorage` hook-оор `localStorage`-д
+`setup → playing → finished`, дээр нь статистикийн дэлгэц (`showStats`, хадгалагдахгүй
+локал state). Бүх төлөв `useLocalStorage` hook-оор `localStorage`-д
 автоматаар хадгалагдана (refresh хийсэн ч тоглоом хэвээр).
 
 ### Файлын бүтэц
@@ -39,36 +41,54 @@ npm run lint     # ESLint
 | `app/page.tsx` | Үндсэн orchestrator — үе шатыг сэлгэх, бүх handler, дуу тоглуулах |
 | `app/layout.tsx` | `lang="mn"`, харанхуй сэдэв, ар талын дартсын самбар зураг |
 | `app/globals.css` | Tailwind v4 import, тогтмол харанхуй сэдэв |
-| `lib/types.ts` | `Player`, `GameState`, `StartingScore` (301\|501\|701), `GamePhase` |
+| `lib/types.ts` | `Player`, `GameState`, `StartingScore` (301\|501\|701), `GamePhase`, `Dart`, `InputMode` |
 | `lib/x01.ts` | **Цэвэр тоглоомын логик** (UI-гүй) |
+| `lib/checkout.ts` | Double-out хаалтын зөвлөмж (`checkoutRoute`, `checkoutHint`), 2–170 урьдчилан тооцоолсон |
+| `lib/history.ts` | Дууссан тоглоомын бичлэг (`buildGameRecord`, `addRecord`) ба нэгтгэсэн статистик (`aggregateStats`) |
 | `lib/colors.ts` | Тоглогчийн өнгөний палитр (`PLAYER_COLORS`, `playerColor`) |
 | `lib/sounds.ts` | Web Audio эффект + TTS дуу хэлэлт |
 | `hooks/useLocalStorage.ts` | SSR-safe localStorage синк hook (`[value, setValue, hydrated]`) |
 | `components/SetupScreen.tsx` | Эхлэх оноо + тоглогч сонгох |
 | `components/GameScreen.tsx` | Тоглоомын дэлгэц (картууд + оноо оруулах + дуу товч) |
-| `components/ScoreInput.tsx` | Оноо оруулах талбар + түргэн товчнууд + Undo |
+| `components/ScoreInput.tsx` | "Нийт оноо" горим: оноо оруулах талбар + түргэн товчнууд + Undo |
+| `components/DartPad.tsx` | "Сум бүрээр" горим: S/D/T + 1–20/25/Алдсан товчлуур; win/bust эсвэл 3 сумаар ээлж дуусна |
+| `components/StatsScreen.tsx` | Тоглогчийн нэгтгэсэн статистик + сүүлийн тоглоомуудын жагсаалт |
 | `components/PlayerCard.tsx` | Нэг тоглогчийн карт (өнгөт) |
 | `components/GameOverScreen.tsx` | Ялагч + статистик + дахин эхлэх |
 | `public/dartboard.svg` | Ар талын дартсын самбар зураг (кодоор generate хийсэн) |
 
 ### localStorage түлхүүрүүд
 
-- `dart-score:game` — `GameState` (идэвхтэй тоглоом)
+- `dart-score:game:v3` — `GameState` (идэвхтэй тоглоом). Бүтэц өөрчлөгдвөл хувилбарыг ахиулна.
+- `dart-score:history` — `GameRecord[]` (дууссан тоглоомууд, шинэ нь эхэнд, дээд тал нь 200)
 - `dart-score:sound` — дуу асаалттай эсэх (boolean)
+- `dart-score:input-mode` — `"total" | "darts"`
 
 ## Тоглоомын дүрэм (`lib/x01.ts`)
 
-X01: тоглогч бүр эхлэх оноогоор (301/501/701) эхэлж, ээлж бүрд **3 сумны нийт оноог**
-(0–180) нэг утгаар оруулж тэг рүү буурдаг.
+X01: тоглогч бүр эхлэх оноогоор (301/501/701) эхэлж тэг рүү бууруулна. `legsToWin` leg
+эхэлж хожсон нь ялна; leg бүрд эхлэгч ээлжлэн солигдоно.
 
-- `evaluateTurn(remaining, scored)` → `"win" | "bust" | "ok"`
-  - `remaining - scored === 0` → **win**
-  - `< 0` эсвэл `=== 1` → **bust** (оноо хэвээр, ээлж шилжинэ; double-out-ыг хатуу шалгахгүй)
-  - бусад → **ok**
-- `applyTurn(state, scored)` — ээлж хэрэглэж шинэ `GameState` буцаана (immutable). Bust
-  ээлжийг `turns` массивт `0`-оор бүртгэнэ.
-- `undoLastTurn(state)` — сүүлийн ээлжийг буцаана (ялалтын дараа ч).
-- `isValidScore` (0–180 бүхэл тоо), `threeDartAverage`, `MAX_TURN_SCORE = 180`.
+Оруулах хоёр горим:
+- **Нийт оноо** — `applyTurn(state, scored)`: ээлжийн нийлбэр (0–180), 3 сум гэж тооцно.
+  `evaluateTurn`: 0 → win, < 0 эсвэл (double-out үед) 1 → bust. Хаасан сум хос байсан
+  эсэхийг шалгах боломжгүй.
+- **Сум бүрээр** — `applyDarts(state, darts)`: `evaluateDarts` сумнуудыг дарааллаар нь
+  үнэлж, win/bust болмогц зогсоно (1–3 сум). Double-out үед сүүлийн сум заавал хос
+  (`D1–D20`, Bull) — үгүй бол bust. Win/bust биш бол яг 3 сум шаардана.
+
+Бүртгэл: ээлж бүрд `turns` (оноо, bust = 0) ба `turnDarts` (сумны тоо) зэрэгцээ
+хадгалагдана; дууссан leg-ууд `legTurns` / `legTurnDarts` / `legDarts`-д архивлагдана.
+Дундаж = нийт оноо / нийт сум × 3 (`averageOf`).
+
+- `undoLastTurn(state)` — нэг ээлж буцаана: тоглоом дууссаны дараа ч, leg-ийн хил дээр ч
+  (өмнөх leg-ийг сэргээж, хожсон ээлжийг нь буцаана).
+
+## Түүх (`lib/history.ts`)
+
+`app/page.tsx`-ийн `commit` нь шинэ төлөв `finished` болмогц `buildGameRecord`-оор түүхэнд
+бичнэ (`GameState.id`-аар upsert). Дууссан тоглоомыг undo хийвэл түүхээс хасагдана.
+Тоглогчийг тоглоом хооронд **нэрээр** нь нэгтгэнэ.
 
 Чухал: логик функцууд **цэвэр** (side-effect-гүй), тестлэх/өргөтгөхөд хялбар. Шинэ дүрэм
 нэмэхдээ энд төвлөрүүлнэ.
@@ -76,7 +96,8 @@ X01: тоглогч бүр эхлэх оноогоор (301/501/701) эхэлж,
 ## Дуу (`lib/sounds.ts`)
 
 Бүх дуу хэрэглэгчийн товшилтын дараа дуудагдана (browser autoplay бодлого). `app/page.tsx`-ийн
-`handleScore`-д оноо хэрэглэхээс өмнө `evaluateTurn`-ээр үр дүнг тооцоолж дуу сонгоно.
+`handleScore` / `handleDarts`-д оноо хэрэглэхээс өмнө `evaluateTurn` / `evaluateDarts`-аар
+үр дүнг тооцоолж дуу сонгоно.
 
 - `speakScore(n)` — оруулсан оноог **TTS-ээр дуудна** (Web Speech API):
   - Тусгай нэр: `SPECIAL_SCORE_NAMES` map (одоо `26 → "Алдар"`)
@@ -91,7 +112,8 @@ X01: тоглогч бүр эхлэх оноогоор (301/501/701) эхэлж,
 - **Логик ба UI-г салгах:** тоглоомын дүрэм `lib/x01.ts`-д цэвэр функц, компонентууд зөвхөн харуулна.
 - **Immutable state:** `GameState`-г шинэ объект буцааж шинэчилнэ.
 - **Монгол UI:** бүх текст монгол хэл дээр.
-- **SSR-safe:** `useLocalStorage` эхний render-д default өгч, hydration-ы дараа уншина
-  (`hydrated` flag-аар "Уншиж байна…" харуулна).
+- **SSR-safe:** `useLocalStorage` нь `useSyncExternalStore` дээр суурилсан — server/hydration
+  render-д default, дараа нь localStorage-ийн утга (`hydrated` flag-аар "Уншиж байна…").
+  `defaultValue`-г модулийн тогтмол болгож дамжуул (render бүрд шинэ объект бүү үүсгэ).
 - **Tailwind v4 динамик класс:** `lib/colors.ts`-д класс нэрсийг бүтэн литералаар бичсэн
   (purge хийгдэхгүй) — энэ хэвийг хадгал.

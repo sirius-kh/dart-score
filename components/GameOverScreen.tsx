@@ -8,9 +8,15 @@ interface GameOverScreenProps {
   state: GameState;
   onUndo: () => void;
   onNewGame: () => void;
+  onShowStats: () => void;
 }
 
-export default function GameOverScreen({ state, onUndo, onNewGame }: GameOverScreenProps) {
+export default function GameOverScreen({
+  state,
+  onUndo,
+  onNewGame,
+  onShowStats,
+}: GameOverScreenProps) {
   const winner = state.players.find((p) => p.id === state.winnerId);
   // Хожсон leg, дараа нь дунджаар эрэмбэлсэн жагсаалт
   const ranked = [...state.players].sort(
@@ -67,6 +73,12 @@ export default function GameOverScreen({ state, onUndo, onNewGame }: GameOverScr
           className="rounded-lg bg-emerald-600 px-4 py-3 text-lg font-bold text-white transition hover:bg-emerald-500"
         >
           Дахин эхлэх
+        </button>
+        <button
+          onClick={onShowStats}
+          className="rounded-lg border border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:border-neutral-500"
+        >
+          📊 Статистик ба түүх
         </button>
         <button
           onClick={onUndo}

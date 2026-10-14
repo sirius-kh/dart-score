@@ -1,13 +1,17 @@
 "use client";
 
-import type { GameState } from "@/lib/types";
+import type { Dart, GameState, InputMode } from "@/lib/types";
 import { checkoutHint } from "@/lib/checkout";
 import PlayerCard from "./PlayerCard";
 import ScoreInput from "./ScoreInput";
+import DartPad from "./DartPad";
 
 interface GameScreenProps {
   state: GameState;
   onScore: (scored: number) => void;
+  onDarts: (darts: Dart[]) => void;
+  inputMode: InputMode;
+  onChangeInputMode: (mode: InputMode) => void;
   onUndo: () => void;
   onQuit: () => void;
   soundOn: boolean;
@@ -17,6 +21,9 @@ interface GameScreenProps {
 export default function GameScreen({
   state,
   onScore,
+  onDarts,
+  inputMode,
+  onChangeInputMode,
   onUndo,
   onQuit,
   soundOn,
@@ -90,13 +97,48 @@ export default function GameScreen({
         ))}
       </div>
 
-      <ScoreInput
-        playerName={current.name}
-        onSubmit={onScore}
-        onUndo={onUndo}
-        canUndo={canUndo}
-        checkout={checkout}
-      />
+      {/* Оруулах горим: ээлжийн нийт оноо эсвэл сум тус бүр */}
+      <div className="grid grid-cols-2 gap-1 rounded-lg border border-neutral-800 bg-neutral-900/60 p-1 text-sm">
+        {(
+          [
+            ["total", "Нийт оноо"],
+            ["darts", "Сум бүрээр"],
+          ] as const
+        ).map(([mode, label]) => (
+          <button
+            key={mode}
+            onClick={() => onChangeInputMode(mode)}
+            className={`rounded-md px-3 py-1.5 font-medium transition ${
+              inputMode === mode
+                ? "bg-neutral-700 text-neutral-100"
+                : "text-neutral-400 hover:text-neutral-200"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {inputMode === "darts" ? (
+        <DartPad
+          // Тоглогч солигдоход (undo гэх мэт) дутуу оруулсан сумнууд цэвэрлэгдэнэ
+          key={`${state.legNumber}-${state.currentPlayerIndex}-${current.turns.length}`}
+          playerName={current.name}
+          remaining={current.remaining}
+          doubleOut={state.doubleOut}
+          onSubmit={onDarts}
+          onUndo={onUndo}
+          canUndo={canUndo}
+        />
+      ) : (
+        <ScoreInput
+          playerName={current.name}
+          onSubmit={onScore}
+          onUndo={onUndo}
+          canUndo={canUndo}
+          checkout={checkout}
+        />
+      )}
     </div>
   );
 }

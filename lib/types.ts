@@ -11,17 +11,23 @@ export interface Player {
   remaining: number;
   /** Идэвхтэй leg-ийн ээлж бүрийн нийт оноо (bust = 0) */
   turns: number[];
+  /** Идэвхтэй leg-ийн ээлж бүрд хаясан сумны тоо (`turns`-тай зэрэгцээ, 1–3) */
+  turnDarts: number[];
   /** Идэвхтэй leg-д хаясан нийт сум (bust ээлжийг оруулна) */
   dartsThrown: number;
   /** Дууссан leg бүрийн ээлжүүд (бүх тоглоомын статистикт) */
   legTurns: number[][];
   /** Дууссан leg бүрд хаясан сумны тоо */
   legDarts: number[];
+  /** Дууссан leg бүрийн ээлж тус бүрийн сумны тоо (`legTurns`-тай зэрэгцээ) */
+  legTurnDarts: number[][];
   /** Хожсон leg-ийн тоо */
   legsWon: number;
 }
 
 export interface GameState {
+  /** Тоглоомын давтагдашгүй id (түүхэнд давхардуулахгүй хадгалахад) */
+  id: string;
   phase: GamePhase;
   startingScore: StartingScore;
   /** Хосоор (double) хаах дүрэм идэвхтэй эсэх */
@@ -42,3 +48,15 @@ export interface GameState {
   /** Хамгийн сүүлийн ээлж bust байсан эсэх (UI дээр түр харуулна) */
   lastWasBust: boolean;
 }
+
+/** Сумны үржүүлэгч: 1 = single, 2 = double, 3 = treble */
+export type Multiplier = 1 | 2 | 3;
+
+/** Нэг сум. `segment`: 0 = алдсан, 1–20, 25 = bull (D25 = bullseye 50) */
+export interface Dart {
+  segment: number;
+  multiplier: Multiplier;
+}
+
+/** Оноо оруулах горим: ээлжийн нийт оноо эсвэл сум тус бүр */
+export type InputMode = "total" | "darts";

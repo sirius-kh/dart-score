@@ -10,9 +10,10 @@ interface SetupScreenProps {
     startingScore: StartingScore,
     options: GameOptions,
   ) => void;
+  onShowStats: () => void;
 }
 
-export default function SetupScreen({ onStart }: SetupScreenProps) {
+export default function SetupScreen({ onStart, onShowStats }: SetupScreenProps) {
   const [startingScore, setStartingScore] = useState<StartingScore>(501);
   const [doubleOut, setDoubleOut] = useState(true);
   const [legsToWin, setLegsToWin] = useState(1);
@@ -163,6 +164,13 @@ export default function SetupScreen({ onStart }: SetupScreenProps) {
           Хамгийн багадаа 2 тоглогч хэрэгтэй.
         </p>
       )}
+
+      <button
+        onClick={onShowStats}
+        className="self-center rounded-lg border border-neutral-700 px-4 py-2 text-sm text-neutral-400 hover:border-neutral-500 hover:text-neutral-200"
+      >
+        📊 Статистик ба түүх
+      </button>
     </div>
   );
 }
