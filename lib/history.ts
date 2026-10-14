@@ -14,6 +14,20 @@ export interface PlayerRecord {
   darts: number;
   /** Хожсон leg бүрийн хаалтын (сүүлийн) ээлжийн оноо */
   checkouts: number[];
+  /** Leg тус бүрийн дэлгэрэнгүй (хуучин бичлэгт байхгүй) */
+  legs?: LegRecord[];
+}
+
+/** Нэг тоглогчийн нэг leg-ийн ээлжүүд */
+export interface LegRecord {
+  /** Ээлж бүрийн оноо (bust = 0) */
+  turns: number[];
+  /** Ээлж бүрд хаясан сум */
+  darts: number[];
+  /** Ээлж бүрд хос руу шидсэн сум (`null` — мэдэгдэхгүй) */
+  attempts: (number | null)[];
+  /** Энэ тоглогч leg-ийг хаасан эсэх */
+  won: boolean;
 }
 
 /** Түүхэнд хадгалах нэг дууссан тоглоом */
@@ -50,6 +64,8 @@ export function buildGameRecord(state: GameState, finishedAt: number): GameRecor
     winnerName: winner.name,
     players: state.players.map((p) => {
       const legs = [...p.legTurns, p.turns];
+      const legDarts = [...p.legTurnDarts, p.turnDarts];
+      const legAttempts = [...p.legTurnAttempts, p.turnAttempts];
       return {
         name: p.name,
         legsWon: p.legsWon,
@@ -59,6 +75,15 @@ export function buildGameRecord(state: GameState, finishedAt: number): GameRecor
         checkouts: legs
           .filter((t) => t.length > 0 && sum(t) === state.startingScore)
           .map((t) => t[t.length - 1]),
+        legs: legs
+          // Тоглоом дуусахад эхлээгүй leg (ялагчаас бусдын хоосон ээлж) байхгүй ч хамгаалалт
+          .map((turns, i) => ({
+            turns,
+            darts: legDarts[i] ?? [],
+            attempts: legAttempts[i] ?? [],
+            won: turns.length > 0 && sum(turns) === state.startingScore,
+          }))
+          .filter((l) => l.turns.length > 0),
       };
     }),
   };

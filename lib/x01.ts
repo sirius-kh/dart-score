@@ -26,10 +26,12 @@ export function createPlayer(name: string, startingScore: StartingScore): Player
     remaining: startingScore,
     turns: [],
     turnDarts: [],
+    turnAttempts: [],
     dartsThrown: 0,
     legTurns: [],
     legDarts: [],
     legTurnDarts: [],
+    legTurnAttempts: [],
     legsWon: 0,
   };
 }
@@ -110,6 +112,13 @@ export interface DartsEvaluation {
   scored: number;
   /** Ээлж дуусах хүртэл хаясан сум (win/bust үед 3-аас цөөн байж болно) */
   dartsUsed: number;
+  /** Нэг сумаар хаах боломжтой (хос үлдсэн) үед шидсэн сум — хаалтын хувьд */
+  attempts: number;
+}
+
+/** Үлдэгдлийг нэг сумаар хосоор хаах боломжтой эсэх (D1–D20 эсвэл Bull) */
+export function isOneDartFinish(remaining: number): boolean {
+  return remaining === 50 || (remaining >= 2 && remaining <= 40 && remaining % 2 === 0);
 }
 
 /**
@@ -122,16 +131,18 @@ export function evaluateDarts(
   doubleOut = true,
 ): DartsEvaluation {
   let left = remaining;
+  let attempts = 0;
   for (let i = 0; i < darts.length && i < DARTS_PER_TURN; i++) {
+    if (isOneDartFinish(left)) attempts += 1;
     const next = left - dartValue(darts[i]);
     if (next === 0) {
       if (!doubleOut || isDoubleDart(darts[i])) {
-        return { outcome: "win", scored: remaining, dartsUsed: i + 1 };
+        return { outcome: "win", scored: remaining, dartsUsed: i + 1, attempts };
       }
-      return { outcome: "bust", scored: 0, dartsUsed: i + 1 };
+      return { outcome: "bust", scored: 0, dartsUsed: i + 1, attempts };
     }
     if (next < 0 || (doubleOut && next === 1)) {
-      return { outcome: "bust", scored: 0, dartsUsed: i + 1 };
+      return { outcome: "bust", scored: 0, dartsUsed: i + 1, attempts };
     }
     left = next;
   }
@@ -139,6 +150,7 @@ export function evaluateDarts(
     outcome: "ok",
     scored: remaining - left,
     dartsUsed: Math.min(darts.length, DARTS_PER_TURN),
+    attempts,
   };
 }
 
@@ -162,21 +174,24 @@ function clonePlayers(players: Player[]): Player[] {
     ...p,
     turns: [...p.turns],
     turnDarts: [...p.turnDarts],
+    turnAttempts: [...p.turnAttempts],
     legTurns: p.legTurns.map((t) => [...t]),
     legDarts: [...p.legDarts],
     legTurnDarts: p.legTurnDarts.map((t) => [...t]),
+    legTurnAttempts: p.legTurnAttempts.map((t) => [...t]),
   }));
 }
 
 /**
  * Үнэлсэн ээлжийг идэвхтэй тоглогчид бүртгэж шинэ төлөв буцаана.
- * `darts` — энэ ээлжид хаясан сумны тоо (1–3).
+ * `darts` — энэ ээлжид хаясан сумны тоо (1–3); `attempts` — хос руу шидсэн сум (мэдэгдэхгүй бол null).
  */
 function commitTurn(
   state: GameState,
   outcome: TurnOutcome,
   scored: number,
   darts: number,
+  attempts: number | null,
 ): GameState {
   const players = clonePlayers(state.players);
   const current = players[state.currentPlayerIndex];
@@ -185,6 +200,7 @@ function commitTurn(
   if (outcome === "bust") {
     current.turns.push(0);
     current.turnDarts.push(darts);
+    current.turnAttempts.push(attempts);
     current.dartsThrown += darts;
     return {
       ...state,
@@ -200,6 +216,7 @@ function commitTurn(
     current.remaining = 0;
     current.turns.push(scored);
     current.turnDarts.push(darts);
+    current.turnAttempts.push(attempts);
     current.dartsThrown += darts;
     current.legsWon += 1;
 
@@ -221,8 +238,10 @@ function commitTurn(
       p.legTurns.push([...p.turns]);
       p.legDarts.push(p.dartsThrown);
       p.legTurnDarts.push([...p.turnDarts]);
+      p.legTurnAttempts.push([...p.turnAttempts]);
       p.turns = [];
       p.turnDarts = [];
+      p.turnAttempts = [];
       p.dartsThrown = 0;
       p.remaining = state.startingScore;
     }
@@ -242,6 +261,7 @@ function commitTurn(
   current.remaining -= scored;
   current.turns.push(scored);
   current.turnDarts.push(darts);
+  current.turnAttempts.push(attempts);
   current.dartsThrown += darts;
   return {
     ...state,
@@ -260,7 +280,7 @@ export function applyTurn(state: GameState, scored: number): GameState {
   if (state.phase !== "playing" || !isValidScore(scored)) return state;
   const current = state.players[state.currentPlayerIndex];
   const outcome = evaluateTurn(current.remaining, scored, state.doubleOut);
-  return commitTurn(state, outcome, scored, DARTS_PER_TURN);
+  return commitTurn(state, outcome, scored, DARTS_PER_TURN, null);
 }
 
 /**
@@ -272,7 +292,13 @@ export function applyDarts(state: GameState, darts: Dart[]): GameState {
   const current = state.players[state.currentPlayerIndex];
   const result = evaluateDarts(current.remaining, darts, state.doubleOut);
   if (result.outcome === "ok" && result.dartsUsed < DARTS_PER_TURN) return state;
-  return commitTurn(state, result.outcome, result.scored, result.dartsUsed);
+  return commitTurn(
+    state,
+    result.outcome,
+    result.scored,
+    result.dartsUsed,
+    state.doubleOut ? result.attempts : null,
+  );
 }
 
 /**
@@ -297,6 +323,7 @@ export function undoLastTurn(state: GameState): GameState {
     if (winner.turns.length === 0) return state;
     winner.turns.pop();
     winner.turnDarts.pop();
+    winner.turnAttempts.pop();
     winner.dartsThrown = sum(winner.turnDarts);
     winner.remaining = remainingFromTurns(state.startingScore, winner.turns);
     winner.legsWon = Math.max(0, winner.legsWon - 1);
@@ -319,6 +346,7 @@ export function undoLastTurn(state: GameState): GameState {
       p.legDarts.pop();
       p.turns = turns;
       p.turnDarts = p.legTurnDarts.pop() ?? [];
+      p.turnAttempts = p.legTurnAttempts.pop() ?? [];
       p.dartsThrown = sum(p.turnDarts);
       p.remaining = remainingFromTurns(state.startingScore, turns);
       if (p.remaining === 0) {
@@ -329,6 +357,7 @@ export function undoLastTurn(state: GameState): GameState {
     const winner = players[winnerIndex];
     winner.turns.pop();
     winner.turnDarts.pop();
+    winner.turnAttempts.pop();
     winner.dartsThrown = sum(winner.turnDarts);
     winner.remaining = remainingFromTurns(state.startingScore, winner.turns);
     const prevStarter = (state.legStarterIndex - 1 + n) % n;
@@ -350,6 +379,7 @@ export function undoLastTurn(state: GameState): GameState {
   if (target.turns.length === 0) return state;
   target.turns.pop();
   target.turnDarts.pop();
+  target.turnAttempts.pop();
   target.dartsThrown = sum(target.turnDarts);
   target.remaining = remainingFromTurns(state.startingScore, target.turns);
 

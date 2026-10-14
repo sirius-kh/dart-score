@@ -13,6 +13,11 @@ export interface Player {
   turns: number[];
   /** Идэвхтэй leg-ийн ээлж бүрд хаясан сумны тоо (`turns`-тай зэрэгцээ, 1–3) */
   turnDarts: number[];
+  /**
+   * Идэвхтэй leg-ийн ээлж бүрд хос руу (нэг сумаар хаах боломжтой үед) шидсэн сум.
+   * `null` — мэдэгдэхгүй ("Нийт оноо" горим эсвэл straight-out). Хаалтын хувьд ашиглана.
+   */
+  turnAttempts: (number | null)[];
   /** Идэвхтэй leg-д хаясан нийт сум (bust ээлжийг оруулна) */
   dartsThrown: number;
   /** Дууссан leg бүрийн ээлжүүд (бүх тоглоомын статистикт) */
@@ -21,6 +26,8 @@ export interface Player {
   legDarts: number[];
   /** Дууссан leg бүрийн ээлж тус бүрийн сумны тоо (`legTurns`-тай зэрэгцээ) */
   legTurnDarts: number[][];
+  /** Дууссан leg бүрийн `turnAttempts` */
+  legTurnAttempts: (number | null)[][];
   /** Хожсон leg-ийн тоо */
   legsWon: number;
 }

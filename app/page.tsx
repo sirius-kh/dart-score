@@ -24,9 +24,9 @@ import GameOverScreen from "@/components/GameOverScreen";
 import StatsScreen from "@/components/StatsScreen";
 import FlashOverlay, { type Flash } from "@/components/FlashOverlay";
 
-// v3: тоглоомын id, ээлж бүрийн сумны тоо (turnDarts) нэмэгдсэнээр GameState-ийн бүтэц
+// v4: ээлж бүрийн хос руу шидсэн сум (turnAttempts) нэмэгдсэнээр GameState-ийн бүтэц
 // өөрчлөгдсөн тул түлхүүрийг шинэчилж, нийцгүй хуучин хадгалсан тоглоомыг үл хэрэгснэ.
-const STORAGE_KEY = "dart-score:game:v3";
+const STORAGE_KEY = "dart-score:game:v4";
 const HISTORY_KEY = "dart-score:history";
 
 const INITIAL_STATE: GameState = {
