@@ -1,8 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #10151f;
+  --foreground: #e7ebf4;
+}
+
+/*
+ * DartCounter маягийн палитр: neutral-ийг хар хөх өнгө рүү хазайлгаж, улбар шар
+ * brand өнгө нэмэв. Бүх компонент neutral-* классаар өнгөө авдаг тул энд л солино.
+ */
+@theme {
+  --color-neutral-50: #f4f6fb;
+  --color-neutral-100: #e7ebf4;
+  --color-neutral-200: #cdd4e3;
+  --color-neutral-300: #a9b3c9;
+  --color-neutral-400: #8590ab;
+  --color-neutral-500: #636e8a;
+  --color-neutral-600: #4a546e;
+  --color-neutral-700: #364057;
+  --color-neutral-800: #262e42;
+  --color-neutral-900: #1a2132;
+  --color-neutral-950: #10151f;
+
+  --color-brand-300: #ffc078;
+  --color-brand-400: #ffa53d;
+  --color-brand-500: #ff8a14;
+  --color-brand-600: #e87400;
+  --color-brand-700: #b85a00;
+  --color-brand-950: #2b1a08;
 }
 
 @theme inline {

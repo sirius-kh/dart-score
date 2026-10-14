@@ -27,7 +27,7 @@ export default function GameOverScreen({
     <div className="mx-auto flex w-full max-w-md flex-col gap-6 text-center">
       <div className="flex flex-col gap-2">
         <span className="text-5xl">🏆</span>
-        <h1 className="text-2xl font-bold text-emerald-400">
+        <h1 className="text-3xl font-black tracking-tight text-brand-400">
           {winner?.name ?? "Тоглогч"} яллаа!
         </h1>
         {state.legsToWin > 1 && winner && (
@@ -43,7 +43,7 @@ export default function GameOverScreen({
           return (
             <div
               key={p.id}
-              className={`flex items-center justify-between rounded-lg border px-4 py-3 ${
+              className={`flex items-center justify-between rounded-xl border px-4 py-3 ${
                 p.id === state.winnerId
                   ? `${color.activeBorder} ${color.activeBg}`
                   : "border-neutral-800 bg-neutral-900"
@@ -70,7 +70,7 @@ export default function GameOverScreen({
       <div className="flex flex-col gap-2">
         <button
           onClick={onNewGame}
-          className="rounded-lg bg-emerald-600 px-4 py-3 text-lg font-bold text-white transition hover:bg-emerald-500"
+          className="rounded-xl bg-brand-500 px-4 py-3.5 text-lg font-black text-neutral-950 transition hover:bg-brand-400 active:scale-[0.98]"
         >
           Дахин эхлэх
         </button>
@@ -82,7 +82,7 @@ export default function GameOverScreen({
         </button>
         <button
           onClick={onUndo}
-          className="rounded-lg border border-neutral-700 px-4 py-2 text-sm text-neutral-400 hover:border-amber-500 hover:text-amber-400"
+          className="rounded-lg border border-neutral-700 px-4 py-2 text-sm text-neutral-400 hover:border-brand-500 hover:text-brand-400"
         >
           ↩ Сүүлийн ээлжийг болих
         </button>

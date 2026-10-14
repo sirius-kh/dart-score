@@ -16,7 +16,7 @@ const STYLES: Record<Flash["kind"], { text: string; className: string }> = {
       "bg-gradient-to-b from-amber-200 via-amber-400 to-orange-500 bg-clip-text text-8xl text-transparent",
   },
   bust: { text: "BUST", className: "text-7xl text-red-500" },
-  leg: { text: "LEG!", className: "text-7xl text-emerald-400" },
+  leg: { text: "LEG!", className: "text-7xl text-brand-400" },
 };
 
 export default function FlashOverlay({

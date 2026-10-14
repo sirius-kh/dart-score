@@ -63,7 +63,7 @@ export default function DartPad({
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between text-sm text-neutral-400">
         <span>
           <span className="font-semibold text-neutral-200">{playerName}</span>-ийн сумнууд
@@ -80,7 +80,7 @@ export default function DartPad({
             key={i}
             className={`rounded-lg border px-2 py-2 text-center text-lg font-bold tabular-nums ${
               darts[i]
-                ? "border-emerald-600/60 bg-emerald-500/10 text-emerald-300"
+                ? "border-brand-500/60 bg-brand-500/10 text-brand-300"
                 : i === darts.length
                   ? "border-neutral-500 text-neutral-600"
                   : "border-neutral-800 text-neutral-700"
@@ -95,7 +95,7 @@ export default function DartPad({
       </div>
 
       {hint && (
-        <p className="text-sm text-amber-400">
+        <p className="rounded-lg bg-brand-950 px-3 py-1.5 text-sm text-brand-300">
           💡 Хаах зам: <span className="font-semibold tracking-wide">{hint}</span>
         </p>
       )}
@@ -112,7 +112,7 @@ export default function DartPad({
                   ? "border-rose-500 bg-rose-500/15 text-rose-400"
                   : m.value === 2
                     ? "border-amber-500 bg-amber-500/15 text-amber-400"
-                    : "border-emerald-500 bg-emerald-500/15 text-emerald-400"
+                    : "border-neutral-300 bg-neutral-700 text-neutral-50"
                 : "border-neutral-700 text-neutral-300 hover:border-neutral-500"
             }`}
           >
@@ -127,7 +127,7 @@ export default function DartPad({
           <button
             key={n}
             onClick={() => throwDart(n)}
-            className="rounded-lg border border-neutral-700 bg-neutral-900 py-3 text-lg font-semibold tabular-nums text-neutral-200 transition hover:border-emerald-500 hover:text-emerald-400 active:bg-emerald-500/20"
+            className="rounded-xl bg-neutral-800 py-3.5 text-lg font-bold tabular-nums text-neutral-100 transition hover:bg-neutral-700 active:scale-95 active:bg-neutral-600"
           >
             {n}
           </button>
@@ -137,13 +137,13 @@ export default function DartPad({
         <button
           onClick={() => throwDart(25)}
           disabled={multiplier === 3}
-          className="rounded-lg border border-neutral-700 bg-neutral-900 py-3 font-semibold text-neutral-200 transition hover:border-emerald-500 hover:text-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-xl bg-neutral-800 py-3.5 font-bold text-neutral-100 transition hover:bg-neutral-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {multiplier === 2 ? "Bull (50)" : "25"}
         </button>
         <button
           onClick={() => throwDart(0)}
-          className="rounded-lg border border-neutral-700 bg-neutral-900 py-3 font-semibold text-neutral-400 transition hover:border-red-500 hover:text-red-400"
+          className="rounded-xl bg-neutral-800 py-3.5 font-bold text-neutral-400 transition hover:bg-red-500/15 hover:text-red-400 active:scale-95"
         >
           Алдсан
         </button>
@@ -152,7 +152,7 @@ export default function DartPad({
       <button
         onClick={undo}
         disabled={darts.length === 0 && !canUndo}
-        className="self-start rounded-lg border border-neutral-700 px-4 py-2 text-sm text-neutral-400 transition hover:border-amber-500 hover:text-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
+        className="rounded-xl border border-neutral-800 py-2.5 text-sm font-medium text-neutral-400 transition hover:border-brand-500 hover:text-brand-400 disabled:cursor-not-allowed disabled:opacity-40"
       >
         ↩ {darts.length > 0 ? "Болих (сүүлийн сум)" : "Болих (сүүлийн ээлж)"}
       </button>

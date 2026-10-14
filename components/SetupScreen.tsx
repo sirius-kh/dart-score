@@ -72,133 +72,152 @@ export default function SetupScreen({
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-6">
-      <h1 className="text-center text-3xl font-bold">🎯 Дартсын оноо</h1>
+      <header className="flex items-center justify-between">
+        <h1 className="flex items-center gap-2 text-2xl font-black tracking-tight">
+          <span className="text-brand-500">🎯</span> Дартсын оноо
+        </h1>
+        <button
+          onClick={onShowStats}
+          className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-300 hover:border-brand-500 hover:text-brand-400"
+        >
+          📊 Статистик
+        </button>
+      </header>
 
-      <section className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-neutral-400">Эхлэх оноо</label>
-        <div className="grid grid-cols-3 gap-2">
-          {([301, 501, 701] as StartingScore[]).map((score) => (
-            <button
-              key={score}
-              onClick={() => setStartingScore(score)}
-              className={`rounded-lg border px-4 py-3 text-lg font-semibold transition ${
-                startingScore === score
-                  ? "border-emerald-500 bg-emerald-500/15 text-emerald-400"
-                  : "border-neutral-700 text-neutral-300 hover:border-neutral-500"
-              }`}
-            >
-              {score}
-            </button>
-          ))}
-        </div>
-      </section>
+      <div className="flex flex-col gap-5 rounded-2xl border border-neutral-800 bg-neutral-900/80 p-4">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
+          X01 тоглоом
+        </h2>
 
-      <section className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-neutral-400">Хаах дүрэм</label>
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            onClick={() => setDoubleOut(true)}
-            className={`rounded-lg border px-4 py-3 text-sm font-semibold transition ${
-              doubleOut
-                ? "border-emerald-500 bg-emerald-500/15 text-emerald-400"
-                : "border-neutral-700 text-neutral-300 hover:border-neutral-500"
-            }`}
-          >
-            Хосоор хаах
-            <span className="block text-xs font-normal opacity-70">
-              Double-out
-            </span>
-          </button>
-          <button
-            onClick={() => setDoubleOut(false)}
-            className={`rounded-lg border px-4 py-3 text-sm font-semibold transition ${
-              !doubleOut
-                ? "border-emerald-500 bg-emerald-500/15 text-emerald-400"
-                : "border-neutral-700 text-neutral-300 hover:border-neutral-500"
-            }`}
-          >
-            Энгийн хаалт
-            <span className="block text-xs font-normal opacity-70">
-              Straight-out
-            </span>
-          </button>
-        </div>
-      </section>
-
-      <section className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-neutral-400">
-          Хэдэн leg хожвол ялах вэ
-        </label>
-        <div className="grid grid-cols-4 gap-2">
-          {[1, 2, 3, 5].map((legs) => (
-            <button
-              key={legs}
-              onClick={() => setLegsToWin(legs)}
-              className={`rounded-lg border px-3 py-3 text-lg font-semibold transition ${
-                legsToWin === legs
-                  ? "border-emerald-500 bg-emerald-500/15 text-emerald-400"
-                  : "border-neutral-700 text-neutral-300 hover:border-neutral-500"
-              }`}
-            >
-              {legs}
-            </button>
-          ))}
-        </div>
-        <p className="text-xs text-neutral-500">
-          {legsToWin === 1
-            ? "Нэг leg — эхэлж хаасан нь ялна."
-            : `Эхэлж ${legsToWin} leg хожсон тоглогч ялна.`}
-        </p>
-      </section>
-
-      <section className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-neutral-400">Тоглогчид</label>
-        <div className="flex flex-col gap-2">
-          {names.map((name, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <input
-                value={name}
-                onChange={(e) => updateName(i, e.target.value)}
-                placeholder={`Тоглогч ${i + 1}`}
-                className="flex-1 rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 outline-none focus:border-emerald-500"
-              />
-              {names.length > 2 && (
-                <button
-                  onClick={() => removePlayer(i)}
-                  aria-label="Тоглогч хасах"
-                  className="rounded-lg border border-neutral-700 px-3 py-2 text-neutral-400 hover:border-red-500 hover:text-red-400"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-        {suggestions.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {suggestions.map((n) => (
+        <section className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-neutral-400">Эхлэх оноо</label>
+          <div className="grid grid-cols-3 gap-2">
+            {([301, 501, 701] as StartingScore[]).map((score) => (
               <button
-                key={n}
-                onClick={() => pickName(n)}
-                className="rounded-full border border-neutral-700 bg-neutral-900 px-3 py-1 text-xs text-neutral-300 hover:border-emerald-500 hover:text-emerald-400"
+                key={score}
+                onClick={() => setStartingScore(score)}
+                className={`rounded-lg border px-4 py-3 text-lg font-semibold transition ${
+                  startingScore === score
+                    ? "border-brand-500 bg-brand-500/15 text-brand-400"
+                    : "border-neutral-700 text-neutral-300 hover:border-neutral-500"
+                }`}
               >
-                + {n}
+                {score}
               </button>
             ))}
           </div>
-        )}
-        <button
-          onClick={addPlayer}
-          className="mt-1 rounded-lg border border-dashed border-neutral-700 px-3 py-2 text-sm text-neutral-400 hover:border-neutral-500"
-        >
-          + Тоглогч нэмэх
-        </button>
-      </section>
+        </section>
+
+        <section className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-neutral-400">Хаах дүрэм</label>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setDoubleOut(true)}
+              className={`rounded-lg border px-4 py-3 text-sm font-semibold transition ${
+                doubleOut
+                  ? "border-brand-500 bg-brand-500/15 text-brand-400"
+                  : "border-neutral-700 text-neutral-300 hover:border-neutral-500"
+              }`}
+            >
+              Хосоор хаах
+              <span className="block text-xs font-normal opacity-70">
+                Double-out
+              </span>
+            </button>
+            <button
+              onClick={() => setDoubleOut(false)}
+              className={`rounded-lg border px-4 py-3 text-sm font-semibold transition ${
+                !doubleOut
+                  ? "border-brand-500 bg-brand-500/15 text-brand-400"
+                  : "border-neutral-700 text-neutral-300 hover:border-neutral-500"
+              }`}
+            >
+              Энгийн хаалт
+              <span className="block text-xs font-normal opacity-70">
+                Straight-out
+              </span>
+            </button>
+          </div>
+        </section>
+
+        <section className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-neutral-400">
+            Хэдэн leg хожвол ялах вэ
+          </label>
+          <div className="grid grid-cols-4 gap-2">
+            {[1, 2, 3, 5].map((legs) => (
+              <button
+                key={legs}
+                onClick={() => setLegsToWin(legs)}
+                className={`rounded-lg border px-3 py-3 text-lg font-semibold transition ${
+                  legsToWin === legs
+                    ? "border-brand-500 bg-brand-500/15 text-brand-400"
+                    : "border-neutral-700 text-neutral-300 hover:border-neutral-500"
+                }`}
+              >
+                {legs}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-neutral-500">
+            {legsToWin === 1
+              ? "Нэг leg — эхэлж хаасан нь ялна."
+              : `Эхэлж ${legsToWin} leg хожсон тоглогч ялна.`}
+          </p>
+        </section>
+
+      </div>
+
+      <div className="flex flex-col gap-2 rounded-2xl border border-neutral-800 bg-neutral-900/80 p-4">
+        <section className="flex flex-col gap-2">
+          <label className="text-xs font-semibold uppercase tracking-wider text-neutral-500">Тоглогчид</label>
+          <div className="flex flex-col gap-2">
+            {names.map((name, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <input
+                  value={name}
+                  onChange={(e) => updateName(i, e.target.value)}
+                  placeholder={`Тоглогч ${i + 1}`}
+                  className="flex-1 rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 outline-none focus:border-brand-500"
+                />
+                {names.length > 2 && (
+                  <button
+                    onClick={() => removePlayer(i)}
+                    aria-label="Тоглогч хасах"
+                    className="rounded-lg border border-neutral-700 px-3 py-2 text-neutral-400 hover:border-red-500 hover:text-red-400"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          {suggestions.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {suggestions.map((n) => (
+                <button
+                  key={n}
+                  onClick={() => pickName(n)}
+                  className="rounded-full border border-neutral-700 bg-neutral-900 px-3 py-1 text-xs text-neutral-300 hover:border-brand-500 hover:text-brand-400"
+                >
+                  + {n}
+                </button>
+              ))}
+            </div>
+          )}
+          <button
+            onClick={addPlayer}
+            className="mt-1 rounded-lg border border-dashed border-neutral-700 px-3 py-2 text-sm text-neutral-400 hover:border-neutral-500"
+          >
+            + Тоглогч нэмэх
+          </button>
+        </section>
+      </div>
 
       <button
         onClick={handleStart}
         disabled={!canStart}
-        className="rounded-lg bg-emerald-600 px-4 py-3 text-lg font-bold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-40"
+        className="rounded-xl bg-brand-500 px-4 py-3.5 text-lg font-black text-neutral-950 shadow-lg shadow-brand-500/20 transition hover:bg-brand-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
       >
         Эхлүүлэх
       </button>
@@ -208,12 +227,6 @@ export default function SetupScreen({
         </p>
       )}
 
-      <button
-        onClick={onShowStats}
-        className="self-center rounded-lg border border-neutral-700 px-4 py-2 text-sm text-neutral-400 hover:border-neutral-500 hover:text-neutral-200"
-      >
-        📊 Статистик ба түүх
-      </button>
     </div>
   );
 }

@@ -8,8 +8,6 @@ interface ScoreInputProps {
   onSubmit: (scored: number) => void;
   onUndo: () => void;
   canUndo: boolean;
-  /** Хосоор хаах зөвлөмж (байвал) */
-  checkout?: string | null;
 }
 
 const QUICK_SCORES = [0, 26, 41, 45, 60, 81, 100, 140];
@@ -24,7 +22,6 @@ export default function ScoreInput({
   onSubmit,
   onUndo,
   canUndo,
-  checkout,
 }: ScoreInputProps) {
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -79,32 +76,24 @@ export default function ScoreInput({
   }, []);
 
   const keyClass =
-    "rounded-lg border border-neutral-700 bg-neutral-900 py-2.5 text-xl font-semibold tabular-nums text-neutral-200 transition hover:border-emerald-500 active:bg-emerald-500/20";
+    "rounded-xl bg-neutral-800 py-4 text-2xl font-bold tabular-nums text-neutral-100 transition hover:bg-neutral-700 active:scale-95 active:bg-neutral-600";
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between text-sm text-neutral-400">
-        <span>
-          <span className="font-semibold text-neutral-200">{playerName}</span>-ийн ээлжийн
-          нийт оноо
-        </span>
-      </div>
-      {checkout && (
-        <p className="text-sm text-amber-400">
-          💡 Хаах зам: <span className="font-semibold tracking-wide">{checkout}</span>
-        </p>
-      )}
-
-      {/* Оруулж буй утга */}
+    <div className="flex flex-col gap-2">
+      {/* Оруулж буй утга: тоглогчийн нэр + оноо нэг мөрөнд */}
       <div
-        aria-live="polite"
-        className={`rounded-lg border bg-neutral-900 px-4 py-2 text-right text-4xl font-bold tabular-nums ${
-          error ? "border-red-500/70" : "border-neutral-700"
+        className={`flex items-center justify-between gap-3 rounded-xl border bg-neutral-900 px-4 py-2 ${
+          error ? "border-red-500/70" : "border-neutral-800"
         }`}
       >
-        {value === "" ? <span className="text-neutral-600">0–180</span> : value}
+        <span className="min-w-0 truncate text-sm text-neutral-400">
+          <span className="font-semibold text-neutral-200">{playerName}</span>
+        </span>
+        <span aria-live="polite" className="text-4xl font-black tabular-nums">
+          {value === "" ? <span className="text-neutral-700">0</span> : value}
+        </span>
       </div>
-      {error && <p className="-mt-1 text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-red-400">{error}</p>}
 
       {/* Түргэн товчлуурууд */}
       <div className="grid grid-cols-4 gap-2">
@@ -112,7 +101,7 @@ export default function ScoreInput({
           <button
             key={q}
             onClick={() => submitScore(q)}
-            className="rounded-lg border border-neutral-700 bg-neutral-900 px-2 py-2 text-sm text-neutral-300 hover:border-emerald-500 hover:text-emerald-400"
+            className="rounded-lg border border-neutral-800 bg-neutral-900 py-2 text-sm font-semibold tabular-nums text-neutral-300 transition hover:border-brand-500 hover:text-brand-400 active:scale-95"
           >
             {q}
           </button>
@@ -126,7 +115,11 @@ export default function ScoreInput({
             {d}
           </button>
         ))}
-        <button onClick={backspace} aria-label="Арилгах" className={keyClass}>
+        <button
+          onClick={backspace}
+          aria-label="Арилгах"
+          className={`${keyClass} text-neutral-400`}
+        >
           ⌫
         </button>
         <button onClick={() => typeDigit("0")} className={keyClass}>
@@ -134,16 +127,16 @@ export default function ScoreInput({
         </button>
         <button
           onClick={submit}
-          className="rounded-lg bg-emerald-600 py-2.5 text-lg font-bold text-white transition hover:bg-emerald-500"
+          className="rounded-xl bg-brand-500 py-4 text-xl font-black text-neutral-950 transition hover:bg-brand-400 active:scale-95"
         >
-          Бүртгэх
+          OK
         </button>
       </div>
 
       <button
         onClick={onUndo}
         disabled={!canUndo}
-        className="self-start rounded-lg border border-neutral-700 px-4 py-2 text-sm text-neutral-400 transition hover:border-amber-500 hover:text-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
+        className="rounded-xl border border-neutral-800 py-2.5 text-sm font-medium text-neutral-400 transition hover:border-brand-500 hover:text-brand-400 disabled:cursor-not-allowed disabled:opacity-40"
       >
         ↩ Болих (сүүлийн ээлж)
       </button>

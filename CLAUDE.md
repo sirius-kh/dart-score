@@ -128,6 +128,9 @@ straight-out үед `null`) зэрэгцээ хадгалагдана; дуус�
 - **SSR-safe:** `useLocalStorage` нь `useSyncExternalStore` дээр суурилсан — server/hydration
   render-д default, дараа нь localStorage-ийн утга (`hydrated` flag-аар "Уншиж байна…").
   `defaultValue`-г модулийн тогтмол болгож дамжуул (render бүрд шинэ объект бүү үүсгэ).
+- **Палитр (DartCounter маяг):** `app/globals.css`-ийн `@theme`-д `neutral-*`-ийг хар хөх рүү
+  дахин тодорхойлсон, `brand-*` (улбар шар) нь үндсэн товч/сонголтын өнгө. Шинэ компонентод
+  emerald биш `brand-*` хэрэглэ; emerald/red зөвхөн сайн/муу утга (Delta) болон тоглогчийн өнгөнд.
 - **График:** өнгө `#009966` (дундаж) / `#e17100` (эхний 9) — харанхуй дэвсгэр дээр dataviz
   validator-оор шалгасан. Хоёр цуваатай бол тайлбар + шугамын үзүүрт утга заавал.
 - **Анимэйшн:** `app/globals.css`-ийн `@theme`-д `animate-shake` / `animate-pop` / `animate-flash`.

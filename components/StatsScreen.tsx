@@ -98,7 +98,7 @@ function Pill({
       onClick={onClick}
       className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition ${
         active
-          ? "border-emerald-500 bg-emerald-500/15 text-emerald-300"
+          ? "border-brand-500 bg-brand-500/15 text-brand-300"
           : "border-neutral-700 bg-neutral-900 text-neutral-400 hover:border-neutral-500"
       }`}
     >
@@ -316,7 +316,7 @@ export default function StatsScreen({
                       key={s.name}
                       onClick={() => update({ player: s.name })}
                       className={`cursor-pointer border-t border-neutral-800 hover:bg-neutral-800/60 ${
-                        s.name === player ? "bg-emerald-950" : ""
+                        s.name === player ? "bg-brand-950" : ""
                       }`}
                     >
                       <td className="max-w-32 truncate px-3 py-2 font-medium text-neutral-200">
@@ -364,7 +364,7 @@ export default function StatsScreen({
                     <span
                       className={
                         p.name === g.winnerName
-                          ? "font-semibold text-emerald-400"
+                          ? "font-semibold text-brand-400"
                           : "text-neutral-300"
                       }
                     >

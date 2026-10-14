@@ -13,14 +13,18 @@ interface PlayerCardProps {
   legsToWin: number;
   /** Хосоор хаах зөвлөмж (зөвхөн идэвхтэй тоглогчид, боломжтой үед) */
   checkout?: string | null;
+  /** Олон тоглогчтой үед жижиг хэмжээгээр харуулна */
+  compact?: boolean;
 }
 
+/** Онооны самбарын нэг тоглогч (DartCounter маягийн том үлдэгдэлтэй хавтан) */
 export default function PlayerCard({
   player,
   isActive,
   colorIndex,
   legsToWin,
   checkout,
+  compact = false,
 }: PlayerCardProps) {
   const avg = threeDartAverage(player);
   const lastTurn = player.turns.at(-1);
@@ -28,53 +32,75 @@ export default function PlayerCard({
 
   return (
     <div
-      className={`flex flex-col gap-1 rounded-xl border p-4 transition ${
+      className={`relative flex min-w-0 flex-col overflow-hidden rounded-2xl border transition ${
         isActive
-          ? `${color.activeBorder} ${color.activeBg} shadow-lg`
-          : "border-neutral-800 bg-neutral-900"
+          ? `${color.activeBorder} bg-neutral-800 shadow-lg shadow-black/30`
+          : "border-neutral-800 bg-neutral-900 opacity-80"
       }`}
     >
-      <div className="flex items-center justify-between">
-        <span className="flex items-center gap-2 truncate text-lg font-semibold">
-          <span className={`h-3 w-3 shrink-0 rounded-full ${color.dot}`} />
-          {player.name}
-        </span>
-        <span className="flex items-center gap-2">
+      {/* Идэвхтэй тоглогчийн дээд өнгөт зурвас */}
+      <div className={`h-1 ${isActive ? color.dot : "bg-transparent"}`} />
+
+      <div className={`flex flex-col gap-1 ${compact ? "p-3" : "p-4"}`}>
+        <div className="flex items-center justify-between gap-2">
+          <span className="flex min-w-0 items-center gap-2 font-semibold">
+            <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${color.dot}`} />
+            <span className="truncate">{player.name}</span>
+          </span>
           {legsToWin > 1 && (
             <span
-              className="rounded-full bg-neutral-800 px-2 py-0.5 text-xs font-medium text-neutral-300"
-              title="Хожсон leg"
+              className="flex shrink-0 gap-1"
+              title={`Хожсон leg: ${player.legsWon}/${legsToWin}`}
+              aria-label={`Хожсон leg: ${player.legsWon}/${legsToWin}`}
             >
-              🏆 {player.legsWon}/{legsToWin}
+              {Array.from({ length: legsToWin }, (_, i) => (
+                <span
+                  key={i}
+                  className={`h-2 w-2 rounded-full ${
+                    i < player.legsWon ? "bg-brand-500" : "bg-neutral-700"
+                  }`}
+                />
+              ))}
             </span>
           )}
-          {isActive && (
-            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${color.badge}`}>
-              Ээлж
+        </div>
+
+        <div
+          // Үлдэгдэл өөрчлөгдөх бүрд анимэйшн тоглоно
+          key={player.remaining}
+          className={`origin-left animate-pop font-black leading-none tracking-tight tabular-nums ${
+            compact ? "text-5xl" : "text-6xl sm:text-7xl"
+          } ${isActive ? "text-neutral-50" : "text-neutral-300"}`}
+        >
+          {player.remaining}
+        </div>
+
+        <div className="mt-1 grid grid-cols-3 gap-1 text-[11px] text-neutral-500">
+          <span className="flex flex-col">
+            Дундаж
+            <span className="text-sm font-semibold tabular-nums text-neutral-200">
+              {avg.toFixed(1)}
             </span>
-          )}
-        </span>
-      </div>
-      <div
-        // Үлдэгдэл өөрчлөгдөх бүрд анимэйшн тоглоно
-        key={player.remaining}
-        className={`origin-left animate-pop text-4xl font-bold tabular-nums ${color.text}`}
-      >
-        {player.remaining}
-      </div>
-      <div className="flex gap-4 text-xs text-neutral-500">
-        <span>Ээлж: {player.turns.length}</span>
-        <span>Дундаж: {avg.toFixed(1)}</span>
-        {lastTurn !== undefined && (
-          <span>
-            Сүүлд: <span className="font-semibold text-neutral-300">{lastTurn}</span>
           </span>
-        )}
+          <span className="flex flex-col">
+            Сум
+            <span className="text-sm font-semibold tabular-nums text-neutral-200">
+              {player.dartsThrown}
+            </span>
+          </span>
+          <span className="flex flex-col">
+            Сүүлд
+            <span className="text-sm font-semibold tabular-nums text-neutral-200">
+              {lastTurn ?? "—"}
+            </span>
+          </span>
+        </div>
       </div>
+
       {isActive && checkout && (
-        <div className="mt-1 flex items-center gap-2 text-xs">
-          <span className="text-neutral-500">Хаалт:</span>
-          <span className="font-semibold tracking-wide text-amber-400">{checkout}</span>
+        <div className="flex items-center gap-2 border-t border-neutral-700 bg-brand-950 px-4 py-1.5 text-xs">
+          <span className="text-brand-300/80">Хаалт</span>
+          <span className="font-bold tracking-wide text-brand-400">{checkout}</span>
         </div>
       )}
     </div>
