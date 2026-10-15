@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { StartingScore } from "@/lib/types";
 import type { GameOptions } from "@/lib/x01";
 import type { GameRecord } from "@/lib/history";
+import { ChartIcon, TargetIcon } from "./Icons";
 
 interface SetupScreenProps {
   onStart: (
@@ -74,13 +75,13 @@ export default function SetupScreen({
     <div className="mx-auto flex w-full max-w-md flex-col gap-6">
       <header className="flex items-center justify-between">
         <h1 className="flex items-center gap-2 text-2xl font-black tracking-tight">
-          <span className="text-brand-500">🎯</span> Дартсын оноо
+          <TargetIcon className="h-7 w-7 text-brand-500" /> Дартсын оноо
         </h1>
         <button
           onClick={onShowStats}
-          className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-300 hover:border-brand-500 hover:text-brand-400"
+          className="flex items-center gap-1.5 rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-300 hover:border-brand-500 hover:text-brand-400"
         >
-          📊 Статистик
+          <ChartIcon /> Статистик
         </button>
       </header>
 
@@ -90,12 +91,13 @@ export default function SetupScreen({
         </h2>
 
         <section className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-neutral-400">Эхлэх оноо</label>
-          <div className="grid grid-cols-3 gap-2">
+          <span id="setup-score" className="text-sm font-medium text-neutral-400">Эхлэх оноо</span>
+          <div role="group" aria-labelledby="setup-score" className="grid grid-cols-3 gap-2">
             {([301, 501, 701] as StartingScore[]).map((score) => (
               <button
                 key={score}
                 onClick={() => setStartingScore(score)}
+                aria-pressed={startingScore === score}
                 className={`rounded-lg border px-4 py-3 text-lg font-semibold transition ${
                   startingScore === score
                     ? "border-brand-500 bg-brand-500/15 text-brand-400"
@@ -109,10 +111,11 @@ export default function SetupScreen({
         </section>
 
         <section className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-neutral-400">Хаах дүрэм</label>
-          <div className="grid grid-cols-2 gap-2">
+          <span id="setup-out" className="text-sm font-medium text-neutral-400">Хаах дүрэм</span>
+          <div role="group" aria-labelledby="setup-out" className="grid grid-cols-2 gap-2">
             <button
               onClick={() => setDoubleOut(true)}
+              aria-pressed={doubleOut}
               className={`rounded-lg border px-4 py-3 text-sm font-semibold transition ${
                 doubleOut
                   ? "border-brand-500 bg-brand-500/15 text-brand-400"
@@ -126,6 +129,7 @@ export default function SetupScreen({
             </button>
             <button
               onClick={() => setDoubleOut(false)}
+              aria-pressed={!doubleOut}
               className={`rounded-lg border px-4 py-3 text-sm font-semibold transition ${
                 !doubleOut
                   ? "border-brand-500 bg-brand-500/15 text-brand-400"
@@ -141,14 +145,15 @@ export default function SetupScreen({
         </section>
 
         <section className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-neutral-400">
+          <span id="setup-legs" className="text-sm font-medium text-neutral-400">
             Хэдэн leg хожвол ялах вэ
-          </label>
-          <div className="grid grid-cols-4 gap-2">
+          </span>
+          <div role="group" aria-labelledby="setup-legs" className="grid grid-cols-4 gap-2">
             {[1, 2, 3, 5].map((legs) => (
               <button
                 key={legs}
                 onClick={() => setLegsToWin(legs)}
+                aria-pressed={legsToWin === legs}
                 className={`rounded-lg border px-3 py-3 text-lg font-semibold transition ${
                   legsToWin === legs
                     ? "border-brand-500 bg-brand-500/15 text-brand-400"
@@ -170,7 +175,7 @@ export default function SetupScreen({
 
       <div className="flex flex-col gap-2 rounded-2xl border border-neutral-800 bg-neutral-900/80 p-4">
         <section className="flex flex-col gap-2">
-          <label className="text-xs font-semibold uppercase tracking-wider text-neutral-500">Тоглогчид</label>
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-500">Тоглогчид</h2>
           <div className="flex flex-col gap-2">
             {names.map((name, i) => (
               <div key={i} className="flex items-center gap-2">
@@ -178,6 +183,7 @@ export default function SetupScreen({
                   value={name}
                   onChange={(e) => updateName(i, e.target.value)}
                   placeholder={`Тоглогч ${i + 1}`}
+                  aria-label={`Тоглогч ${i + 1}-ийн нэр`}
                   className="flex-1 rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 outline-none focus:border-brand-500"
                 />
                 {names.length > 2 && (

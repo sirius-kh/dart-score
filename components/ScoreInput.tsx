@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MAX_TURN_SCORE, evaluateTurn, isValidScore } from "@/lib/x01";
 import { isCheckoutPossible } from "@/lib/checkout";
+import { UndoIcon } from "./Icons";
 
 interface ScoreInputProps {
   playerName: string;
@@ -136,7 +137,8 @@ export default function ScoreInput({
         {canFinish && (
           <button
             onClick={() => submitScore(remaining)}
-            className="rounded-lg border border-emerald-500/60 bg-emerald-500/10 py-2 text-sm font-bold tabular-nums text-emerald-400 transition hover:bg-emerald-500/20 active:scale-95"
+            aria-label={`Хаах: ${remaining}`}
+            className="rounded-lg border border-brand-500 bg-brand-500/15 py-2 text-sm font-bold tabular-nums text-brand-400 transition hover:bg-brand-500/25 active:scale-95"
           >
             ✓ {remaining}
           </button>
@@ -171,9 +173,9 @@ export default function ScoreInput({
       <button
         onClick={onUndo}
         disabled={!canUndo}
-        className="rounded-xl border border-neutral-800 py-2.5 text-sm font-medium text-neutral-400 transition hover:border-brand-500 hover:text-brand-400 disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-800 py-2.5 text-sm font-medium text-neutral-400 transition hover:border-brand-500 hover:text-brand-400 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        ↩ Болих (сүүлийн ээлж)
+        <UndoIcon /> Болих (сүүлийн ээлж)
       </button>
     </div>
   );

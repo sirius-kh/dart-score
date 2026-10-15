@@ -23,6 +23,7 @@ import GameScreen from "@/components/GameScreen";
 import GameOverScreen from "@/components/GameOverScreen";
 import StatsScreen from "@/components/StatsScreen";
 import FlashOverlay, { type Flash } from "@/components/FlashOverlay";
+import { TargetIcon } from "@/components/Icons";
 
 // v4: ээлж бүрийн хос руу шидсэн сум (turnAttempts) нэмэгдсэнээр GameState-ийн бүтэц
 // өөрчлөгдсөн тул түлхүүрийг шинэчилж, нийцгүй хуучин хадгалсан тоглоомыг үл хэрэгснэ.
@@ -140,7 +141,10 @@ export default function Home() {
       <FlashOverlay flash={flash} onDone={() => setFlash(null)} />
       {/* Hydrate болохоос өмнө layout-ийн үсрэлтийг багасгана */}
       {!hydrated ? (
-        <div className="text-neutral-500">Уншиж байна…</div>
+        <div className="flex flex-col items-center gap-3 text-neutral-500">
+          <TargetIcon className="h-10 w-10 animate-pulse text-brand-500" />
+          <span className="text-sm">Уншиж байна…</span>
+        </div>
       ) : showStats ? (
         <StatsScreen
           history={history}

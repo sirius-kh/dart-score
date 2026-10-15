@@ -15,7 +15,12 @@ interface PlayerCardProps {
   checkout?: string | null;
   /** Олон тоглогчтой үед жижиг хэмжээгээр харуулна */
   compact?: boolean;
+  /** Бүтэн мөр эзлэх (сондгой тооны тоглогчийн сүүлийнх) */
+  wide?: boolean;
 }
+
+/** Картанд харуулах сүүлийн ээлжийн тоо */
+const RECENT_TURNS = 5;
 
 /** Онооны самбарын нэг тоглогч (DartCounter маягийн том үлдэгдэлтэй хавтан) */
 export default function PlayerCard({
@@ -25,14 +30,18 @@ export default function PlayerCard({
   legsToWin,
   checkout,
   compact = false,
+  wide = false,
 }: PlayerCardProps) {
   const avg = threeDartAverage(player);
-  const lastTurn = player.turns.at(-1);
+  // Шинэ нь эхэнд
+  const recent = player.turns.slice(-RECENT_TURNS).reverse();
   const color = playerColor(colorIndex);
 
   return (
     <div
       className={`relative flex min-w-0 flex-col overflow-hidden rounded-2xl border transition ${
+        wide ? "col-span-2" : ""
+      } ${
         isActive
           ? `${color.activeBorder} bg-neutral-800 shadow-lg shadow-black/30`
           : "border-neutral-800 bg-neutral-900 opacity-80"
@@ -75,7 +84,7 @@ export default function PlayerCard({
           {player.remaining}
         </div>
 
-        <div className="mt-1 grid grid-cols-3 gap-1 text-[11px] text-neutral-500">
+        <div className="mt-1 grid grid-cols-2 gap-1 text-[11px] text-neutral-500">
           <span className="flex flex-col">
             Дундаж
             <span className="text-sm font-semibold tabular-nums text-neutral-200">
@@ -88,12 +97,24 @@ export default function PlayerCard({
               {player.dartsThrown}
             </span>
           </span>
-          <span className="flex flex-col">
-            Сүүлд
-            <span className="text-sm font-semibold tabular-nums text-neutral-200">
-              {lastTurn ?? "—"}
-            </span>
-          </span>
+        </div>
+
+        {/* Сүүлийн ээлжүүд (шинэ нь зүүн талд) */}
+        <div className="flex min-h-5 gap-1 overflow-hidden" aria-label="Сүүлийн ээлжүүд">
+          {recent.length === 0 ? (
+            <span className="text-xs text-neutral-600">—</span>
+          ) : (
+            recent.map((t, i) => (
+              <span
+                key={player.turns.length - i}
+                className={`shrink-0 rounded px-1.5 py-0.5 text-xs font-semibold tabular-nums ${
+                  i === 0 ? "bg-neutral-700 text-neutral-100" : "bg-neutral-800/70 text-neutral-500"
+                }`}
+              >
+                {t}
+              </span>
+            ))
+          )}
         </div>
       </div>
 

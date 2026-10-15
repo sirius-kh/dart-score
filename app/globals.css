@@ -66,6 +66,14 @@ body {
   }
 }
 
+/* Гарын товчоор сонгосон элементийг тод хүрээгээр харуулна */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-shake,
   .animate-pop {

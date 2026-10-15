@@ -59,6 +59,8 @@ npm run lint     # ESLint
 | `components/charts/*` | `TrendChart` (дундаж/эхний 9-ийн шугам), `DistributionChart` (ээлжийн онооны мужууд) — гар аргаар SVG, hover tooltip |
 | `components/PlayerCard.tsx` | Нэг тоглогчийн карт (өнгөт) |
 | `components/GameOverScreen.tsx` | Ялагч + статистик + дахин эхлэх |
+| `components/Icons.tsx` | Inline SVG icon-ууд (emoji-ийн оронд; `currentColor`, хэмжээ className-аар) |
+| `app/manifest.ts`, `app/apple-icon.tsx`, `public/icon.svg` | PWA: нүүр дэлгэцэд суулгах manifest, iOS icon (`next/og`-оор PNG), үндсэн icon |
 | `public/dartboard.svg` | Ар талын дартсын самбар зураг (кодоор generate хийсэн) |
 
 ### localStorage түлхүүрүүд
@@ -118,7 +120,7 @@ straight-out үед `null`) зэрэгцээ хадгалагдана; дуус�
   - **Эрэгтэй хоолой** сонгоно (`getMaleVoice`), `pitch` намссан
 - `playBust()` / `playWin()` — Web Audio API-аар үүсгэсэн буззер / ялалтын арпеджио
 - `playScore()` — энгийн бип (одоо `speakScore`-оор солигдсон, экспортод үлдсэн)
-- 🔊/🔇 товч (`GameScreen`) дуу асаах/унтраах, `dart-score:sound`-д хадгалагдана
+- Дууны товч (`GameScreen`, `VolumeOnIcon`/`VolumeOffIcon`) дуу асаах/унтраах, `dart-score:sound`-д хадгалагдана
 
 ## Гол зарчмууд
 

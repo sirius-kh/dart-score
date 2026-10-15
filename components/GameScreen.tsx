@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Dart, GameState, InputMode } from "@/lib/types";
 import { checkoutHint } from "@/lib/checkout";
 import PlayerCard from "./PlayerCard";
+import { VolumeOffIcon, VolumeOnIcon } from "./Icons";
 import ScoreInput from "./ScoreInput";
 import DartPad from "./DartPad";
 
@@ -42,12 +43,6 @@ export default function GameScreen({
 
   // Идэвхтэй тоглогчийн хосоор хаах зөвлөмж (double-out үед)
   const checkout = state.doubleOut ? checkoutHint(current.remaining) : null;
-
-  // Leg хожсон ялагчийн нэр (leg хооронд түр харуулна)
-  const legWinner =
-    state.legWinnerId != null
-      ? state.players.find((p) => p.id === state.legWinnerId)
-      : null;
 
   const compact = state.players.length > 2;
 
@@ -90,7 +85,7 @@ export default function GameScreen({
                 title={soundOn ? "Дуу унтраах" : "Дуу асаах"}
                 className="rounded-lg px-2.5 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800"
               >
-                {soundOn ? "🔊" : "🔇"}
+                {soundOn ? <VolumeOnIcon className="h-5 w-5" /> : <VolumeOffIcon className="h-5 w-5" />}
               </button>
               <button
                 onClick={() => setConfirmQuit(true)}
@@ -102,18 +97,13 @@ export default function GameScreen({
           )}
         </header>
 
-        {legWinner && (
-          <div className="animate-pop rounded-xl border border-brand-500/50 bg-brand-950 px-4 py-2 text-center text-sm font-semibold text-brand-400">
-            🏆 {legWinner.name} энэ leg-ийг хожлоо! Дараагийн leg эхэллээ.
-          </div>
-        )}
         {state.lastWasBust && (
           <div
             // Дараалсан bust бүрд анимэйшн дахин тоглоно
             key={`bust-${totalTurns}`}
             className="animate-shake rounded-xl border border-red-600/50 bg-red-950 px-4 py-2 text-center text-sm font-semibold text-red-400"
           >
-            💥 Bust! Оноо хэвээр, ээлж шилжлээ.
+            Bust! Оноо хэвээр, ээлж шилжлээ.
           </div>
         )}
 
@@ -121,6 +111,8 @@ export default function GameScreen({
           {state.players.map((player, i) => (
             <PlayerCard
               key={player.id}
+              // Сондгой тоотой үед сүүлийн карт бүтэн мөрийг эзэлнэ
+              wide={i === state.players.length - 1 && state.players.length % 2 === 1}
               player={player}
               isActive={i === state.currentPlayerIndex}
               colorIndex={i}
@@ -144,6 +136,7 @@ export default function GameScreen({
             <button
               key={mode}
               onClick={() => onChangeInputMode(mode)}
+              aria-pressed={inputMode === mode}
               className={`rounded-lg px-3 py-1.5 font-semibold transition ${
                 inputMode === mode
                   ? "bg-brand-500 text-neutral-950"

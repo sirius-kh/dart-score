@@ -17,6 +17,7 @@ import { averageOf } from "@/lib/x01";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import TrendChart from "./charts/TrendChart";
 import DistributionChart from "./charts/DistributionChart";
+import { ChartIcon, TrophyIcon } from "./Icons";
 
 interface StatsScreenProps {
   history: GameRecord[];
@@ -96,6 +97,7 @@ function Pill({
   return (
     <button
       onClick={onClick}
+      aria-pressed={active}
       className={`shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition ${
         active
           ? "border-brand-500 bg-brand-500/15 text-brand-300"
@@ -159,7 +161,9 @@ export default function StatsScreen({
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">📊 Статистик</h1>
+        <h1 className="flex items-center gap-2 text-xl font-bold">
+          <ChartIcon className="h-5 w-5 text-brand-500" /> Статистик
+        </h1>
         <button
           onClick={onBack}
           className="rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-neutral-300 hover:border-neutral-500"
@@ -362,13 +366,13 @@ export default function StatsScreen({
                 {g.players.map((p) => (
                   <div key={p.name} className="flex items-center justify-between text-sm">
                     <span
-                      className={
+                      className={`flex items-center gap-1 ${
                         p.name === g.winnerName
                           ? "font-semibold text-brand-400"
                           : "text-neutral-300"
-                      }
+                      }`}
                     >
-                      {p.name === g.winnerName ? "🏆 " : ""}
+                      {p.name === g.winnerName && <TrophyIcon className="h-3.5 w-3.5" />}
                       {p.name}
                       {g.legsToWin > 1 && (
                         <span className="ml-1 text-xs text-neutral-500">({p.legsWon})</span>

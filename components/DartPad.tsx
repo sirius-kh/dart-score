@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Dart, Multiplier } from "@/lib/types";
 import { DARTS_PER_TURN, dartLabel, dartValue, evaluateDarts } from "@/lib/x01";
 import { checkoutRoute } from "@/lib/checkout";
+import { LightbulbIcon, UndoIcon } from "./Icons";
 
 interface DartPadProps {
   playerName: string;
@@ -95,8 +96,8 @@ export default function DartPad({
       </div>
 
       {hint && (
-        <p className="rounded-lg bg-brand-950 px-3 py-1.5 text-sm text-brand-300">
-          💡 Хаах зам: <span className="font-semibold tracking-wide">{hint}</span>
+        <p className="flex items-center gap-1.5 rounded-lg bg-brand-950 px-3 py-1.5 text-sm text-brand-300">
+          <LightbulbIcon /> Хаах зам: <span className="font-semibold tracking-wide">{hint}</span>
         </p>
       )}
 
@@ -106,6 +107,7 @@ export default function DartPad({
           <button
             key={m.value}
             onClick={() => setMultiplier((cur) => (cur === m.value ? 1 : m.value))}
+            aria-pressed={multiplier === m.value}
             className={`rounded-lg border px-2 py-2 text-sm font-semibold transition ${
               multiplier === m.value
                 ? m.value === 3
@@ -152,9 +154,9 @@ export default function DartPad({
       <button
         onClick={undo}
         disabled={darts.length === 0 && !canUndo}
-        className="rounded-xl border border-neutral-800 py-2.5 text-sm font-medium text-neutral-400 transition hover:border-brand-500 hover:text-brand-400 disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex items-center justify-center gap-1.5 rounded-xl border border-neutral-800 py-2.5 text-sm font-medium text-neutral-400 transition hover:border-brand-500 hover:text-brand-400 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        ↩ {darts.length > 0 ? "Болих (сүүлийн сум)" : "Болих (сүүлийн ээлж)"}
+        <UndoIcon /> {darts.length > 0 ? "Болих (сүүлийн сум)" : "Болих (сүүлийн ээлж)"}
       </button>
     </div>
   );
