@@ -63,7 +63,7 @@ export default function DartPad({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-1 flex-col gap-2">
       <div className="flex items-center justify-between text-sm text-neutral-400">
         <span>
           <span className="font-semibold text-neutral-200">{playerName}</span>-ийн сумнууд
@@ -122,12 +122,12 @@ export default function DartPad({
       </div>
 
       {/* Талбарууд */}
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid flex-1 grid-cols-5 grid-rows-[repeat(4,minmax(2.75rem,1fr))] gap-2 lg:flex-none lg:grid-rows-none">
         {SEGMENTS.map((n) => (
           <button
             key={n}
             onClick={() => throwDart(n)}
-            className="rounded-xl bg-neutral-800 py-3.5 text-lg font-bold tabular-nums text-neutral-100 transition hover:bg-neutral-700 active:scale-95 active:bg-neutral-600"
+            className="rounded-xl bg-neutral-800 py-2 text-lg lg:py-3.5 font-bold tabular-nums text-neutral-100 transition hover:bg-neutral-700 active:scale-95 active:bg-neutral-600"
           >
             {n}
           </button>

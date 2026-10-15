@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { MAX_TURN_SCORE, isValidScore } from "@/lib/x01";
+import { MAX_TURN_SCORE, evaluateTurn, isValidScore } from "@/lib/x01";
+import { isCheckoutPossible } from "@/lib/checkout";
 
 interface ScoreInputProps {
   playerName: string;
+  /** Идэвхтэй тоглогчийн үлдэгдэл — урьдчилсан үр дүн, хаах товчид */
+  remaining: number;
+  doubleOut: boolean;
   onSubmit: (scored: number) => void;
   onUndo: () => void;
   canUndo: boolean;
@@ -19,6 +23,8 @@ const DIGITS = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
  */
 export default function ScoreInput({
   playerName,
+  remaining,
+  doubleOut,
   onSubmit,
   onUndo,
   canUndo,
@@ -75,19 +81,40 @@ export default function ScoreInput({
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // OK дарахаас өмнө оруулж буй оноо ямар үр дүнд хүргэхийг харуулна
+  const preview = value === "" ? null : evaluateTurn(remaining, Number(value), doubleOut);
+
+  // Үлдэгдлийг нэг ээлжээр хаах боломжтой бол сүүлийн түргэн товчийг «Хаах» болгоно
+  const canFinish = doubleOut ? isCheckoutPossible(remaining) : remaining <= MAX_TURN_SCORE;
+  const quickScores = canFinish ? QUICK_SCORES.slice(0, -1) : QUICK_SCORES;
+
   const keyClass =
-    "rounded-xl bg-neutral-800 py-4 text-2xl font-bold tabular-nums text-neutral-100 transition hover:bg-neutral-700 active:scale-95 active:bg-neutral-600";
+    "rounded-xl bg-neutral-800 py-2 lg:py-4 text-2xl font-bold tabular-nums text-neutral-100 transition hover:bg-neutral-700 active:scale-95 active:bg-neutral-600";
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-1 flex-col gap-2">
       {/* Оруулж буй утга: тоглогчийн нэр + оноо нэг мөрөнд */}
       <div
         className={`flex items-center justify-between gap-3 rounded-xl border bg-neutral-900 px-4 py-2 ${
           error ? "border-red-500/70" : "border-neutral-800"
         }`}
       >
-        <span className="min-w-0 truncate text-sm text-neutral-400">
-          <span className="font-semibold text-neutral-200">{playerName}</span>
+        <span className="flex min-w-0 flex-col text-sm text-neutral-400">
+          <span className="truncate font-semibold text-neutral-200">{playerName}</span>
+          <span className="text-xs tabular-nums">
+            {preview === "bust" ? (
+              <span className="font-semibold text-red-400">Bust болно</span>
+            ) : preview === "win" ? (
+              <span className="font-semibold text-emerald-400">Хаалт!</span>
+            ) : (
+              <>
+                Үлдэх:{" "}
+                <span className="font-semibold text-neutral-200">
+                  {remaining - Number(value)}
+                </span>
+              </>
+            )}
+          </span>
         </span>
         <span aria-live="polite" className="text-4xl font-black tabular-nums">
           {value === "" ? <span className="text-neutral-700">0</span> : value}
@@ -97,7 +124,7 @@ export default function ScoreInput({
 
       {/* Түргэн товчлуурууд */}
       <div className="grid grid-cols-4 gap-2">
-        {QUICK_SCORES.map((q) => (
+        {quickScores.map((q) => (
           <button
             key={q}
             onClick={() => submitScore(q)}
@@ -106,10 +133,18 @@ export default function ScoreInput({
             {q}
           </button>
         ))}
+        {canFinish && (
+          <button
+            onClick={() => submitScore(remaining)}
+            className="rounded-lg border border-emerald-500/60 bg-emerald-500/10 py-2 text-sm font-bold tabular-nums text-emerald-400 transition hover:bg-emerald-500/20 active:scale-95"
+          >
+            ✓ {remaining}
+          </button>
+        )}
       </div>
 
       {/* Тоон товчлуур */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid flex-1 grid-cols-3 grid-rows-[repeat(4,minmax(3rem,1fr))] gap-2 lg:flex-none lg:grid-rows-none">
         {DIGITS.map((d) => (
           <button key={d} onClick={() => typeDigit(d)} className={keyClass}>
             {d}
@@ -127,7 +162,7 @@ export default function ScoreInput({
         </button>
         <button
           onClick={submit}
-          className="rounded-xl bg-brand-500 py-4 text-xl font-black text-neutral-950 transition hover:bg-brand-400 active:scale-95"
+          className="rounded-xl bg-brand-500 py-2 text-xl lg:py-4 font-black text-neutral-950 transition hover:bg-brand-400 active:scale-95"
         >
           OK
         </button>

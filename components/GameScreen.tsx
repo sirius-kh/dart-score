@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { Dart, GameState, InputMode } from "@/lib/types";
 import { checkoutHint } from "@/lib/checkout";
 import PlayerCard from "./PlayerCard";
@@ -30,6 +31,8 @@ export default function GameScreen({
   onToggleSound,
 }: GameScreenProps) {
   const current = state.players[state.currentPlayerIndex];
+  // «Дуусгах» санамсаргүй дарагдаж тоглоом устахаас сэргийлж дахин асууна
+  const [confirmQuit, setConfirmQuit] = useState(false);
   // Хэн нэгэн ээлжээ хийсэн (энэ leg-д), эсвэл өмнөх leg байгаа бол undo боломжтой
   const canUndo =
     state.players.some((p) => p.turns.length > 0) ||
@@ -49,9 +52,9 @@ export default function GameScreen({
   const compact = state.players.length > 2;
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-4 lg:grid lg:max-w-5xl lg:grid-cols-2 lg:items-start lg:gap-6">
+    <div className="mx-auto flex min-h-[calc(100dvh-2rem)] w-full max-w-md flex-col gap-3 lg:grid lg:min-h-0 lg:max-w-5xl lg:grid-cols-2 lg:items-start lg:gap-6">
       {/* Зүүн тал (утсанд дээд хэсэг): толгой + онооны самбар */}
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3 lg:gap-4">
         <header className="flex items-center justify-between gap-2 rounded-2xl border border-neutral-800 bg-neutral-900 px-3 py-2">
           <div className="flex min-w-0 items-baseline gap-2">
             <span className="text-2xl font-black tracking-tight text-brand-500">
@@ -63,22 +66,40 @@ export default function GameScreen({
                 ` · Leg ${state.legNumber} · ${state.legsToWin} хожвол ялна`}
             </span>
           </div>
-          <div className="flex shrink-0 items-center gap-1.5">
-            <button
-              onClick={onToggleSound}
-              aria-label={soundOn ? "Дуу унтраах" : "Дуу асаах"}
-              title={soundOn ? "Дуу унтраах" : "Дуу асаах"}
-              className="rounded-lg px-2.5 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800"
-            >
-              {soundOn ? "🔊" : "🔇"}
-            </button>
-            <button
-              onClick={onQuit}
-              className="rounded-lg px-2.5 py-1.5 text-sm text-neutral-400 hover:bg-red-500/10 hover:text-red-400"
-            >
-              Дуусгах
-            </button>
-          </div>
+          {confirmQuit ? (
+            <div className="flex shrink-0 items-center gap-1.5">
+              <span className="text-xs text-neutral-300">Тоглоомыг дуусгах уу?</span>
+              <button
+                onClick={onQuit}
+                className="rounded-lg bg-red-500/15 px-2.5 py-1.5 text-sm font-semibold text-red-400 hover:bg-red-500/25"
+              >
+                Тийм
+              </button>
+              <button
+                onClick={() => setConfirmQuit(false)}
+                className="rounded-lg px-2.5 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800"
+              >
+                Үгүй
+              </button>
+            </div>
+          ) : (
+            <div className="flex shrink-0 items-center gap-1.5">
+              <button
+                onClick={onToggleSound}
+                aria-label={soundOn ? "Дуу унтраах" : "Дуу асаах"}
+                title={soundOn ? "Дуу унтраах" : "Дуу асаах"}
+                className="rounded-lg px-2.5 py-1.5 text-sm text-neutral-300 hover:bg-neutral-800"
+              >
+                {soundOn ? "🔊" : "🔇"}
+              </button>
+              <button
+                onClick={() => setConfirmQuit(true)}
+                className="rounded-lg px-2.5 py-1.5 text-sm text-neutral-400 hover:bg-red-500/10 hover:text-red-400"
+              >
+                Дуусгах
+              </button>
+            </div>
+          )}
         </header>
 
         {legWinner && (
@@ -112,7 +133,7 @@ export default function GameScreen({
       </div>
 
       {/* Баруун тал (утсанд доод хэсэг): оруулах горим + товчлуур */}
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-1 flex-col gap-3 lg:gap-4">
         <div className="grid grid-cols-2 gap-1 rounded-xl border border-neutral-800 bg-neutral-900 p-1 text-sm">
           {(
             [
@@ -148,6 +169,8 @@ export default function GameScreen({
         ) : (
           <ScoreInput
             playerName={current.name}
+            remaining={current.remaining}
+            doubleOut={state.doubleOut}
             onSubmit={onScore}
             onUndo={onUndo}
             canUndo={canUndo}
