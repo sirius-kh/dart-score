@@ -6,6 +6,9 @@ let ctx: AudioContext | null = null;
 function getCtx(): AudioContext | null {
   if (typeof window === "undefined") return null;
   if (!ctx) {
+    // iOS: дуугүй (silent) товчтой үед ч Web Audio сонсогдох (Safari 17+)
+    const session = (navigator as unknown as { audioSession?: { type: string } }).audioSession;
+    if (session) session.type = "playback";
     const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     if (!AC) return null;
     ctx = new AC();
@@ -71,7 +74,11 @@ function warmVoices(synth: SpeechSynthesis) {
   });
 }
 
-/** Боломжтой бол эрэгтэй сонсголтой хоолойг сонгоно */
+/**
+ * Тоог унших хоолой: монгол хоолой байвал түүнийг, үгүй бол англи (боломжтой бол эрэгтэй).
+ * Утсанд олон хэлний хоолой байдаг тул хэлийг шүүхгүй бол санамсаргүй хэлээр уншиж эсвэл
+ * огт дуугардаггүй байсан.
+ */
 function getMaleVoice(synth: SpeechSynthesis): SpeechSynthesisVoice | null {
   if (cachedMaleVoice) return cachedMaleVoice;
   const voices = synth.getVoices();
@@ -83,9 +90,15 @@ function getMaleVoice(synth: SpeechSynthesis): SpeechSynthesisVoice | null {
   const male =
     /male|\bman\b|david|daniel|alex|fred|tom|george|james|mark|paul|english male/;
 
+  const mongolian = voices.filter((v) => v.lang.toLowerCase().startsWith("mn"));
+  const english = voices.filter((v) => v.lang.toLowerCase().startsWith("en"));
+  const pool = mongolian.length ? mongolian : english.length ? english : voices;
+
   cachedMaleVoice =
-    voices.find((v) => male.test(name(v)) && !female.test(name(v))) ??
-    voices.find((v) => !female.test(name(v))) ??
+    pool.find((v) => male.test(name(v)) && !female.test(name(v))) ??
+    pool.find((v) => !female.test(name(v))) ??
+    pool.find((v) => v.default) ??
+    pool[0] ??
     null;
   return cachedMaleVoice;
 }
@@ -102,9 +115,14 @@ export function speakScore(n: number) {
   warmVoices(synth);
   const text = SPECIAL_SCORE_NAMES[n] ?? String(n);
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = "mn-MN"; // боломжгүй бол өгөгдмөл хоолой ашиглана
   const voice = getMaleVoice(synth);
-  if (voice) u.voice = voice;
+  // Хэлийг хоолойтой нь тааруулна: Android-д суугаагүй хэл (mn-MN) заавал юу ч уншдаггүй
+  if (voice) {
+    u.voice = voice;
+    u.lang = voice.lang;
+  } else {
+    u.lang = "en-US";
+  }
   // 100-аас дээш оноог хамгийн чанга (API дээд хязгаар 1.0), онцолсон өнгөөр дуудна.
   // Бусад оноог намсгаснаар >100 оноо хамгийн тод ялгарна.
   // Эрэгтэй өнгөтэй болгохын тулд pitch-ийг намсгана.
@@ -112,7 +130,11 @@ export function speakScore(n: number) {
   u.volume = loud ? 1 : 0.45;
   u.rate = loud ? 0.85 : 1;
   u.pitch = loud ? 0.75 : 0.85;
-  synth.cancel(); // өмнөх дуудлагыг таслаж, давхцахаас сэргийлнэ
+  // Өмнөх дуудлагыг таслана. Утасны браузерт cancel()-ийн шууд дараах speak() алга болдог
+  // тул зөвхөн уншиж байгаа үед л таслана.
+  if (synth.speaking || synth.pending) synth.cancel();
+  // Android Chrome-д синтез "pause" төлөвт гацах тохиолдол байдаг
+  if (synth.paused) synth.resume();
   synth.speak(u);
 }
 
